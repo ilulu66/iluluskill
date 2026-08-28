@@ -1,6 +1,7 @@
-# iluluskill
+# iluluskill · 会客厅 skill
 
-> Lulu 的开源 skill 总箱。首发系列:**lulu-learn 学习工坊**——把一场 3 小时的讲座,做成一份可回访的学习资产。
+> Lulu 的开源 skill 总箱,中文名「**会客厅 skill**」(出自「Lulu 的会客厅」)。
+> 首发系列:**lulu-learn 学习工坊**——把一场 3 小时的讲座,做成一份可回访的学习资产。
 > 别人做压缩,我们做加工——压缩丢真相,加工保真相。
 
 **状态:v0.1 建设中(首发快照预计 2026-09-12)。**
@@ -8,12 +9,12 @@
 ## 命名三层
 
 ```
-iluluskill                 ← 总箱(本仓库,一条命令装全家)
-└── lulu-learn            ← 系列:学习工坊(讲座/课程/工作坊/书)
-    └── lulu-learn-intake ← 件:具体 skill
+iluluskill / 会客厅skill   ← 总箱(本仓库,一条命令装全家)
+└── lulu-learn / 学习工坊  ← 系列(讲座/课程/工作坊/书)
+    └── lulu-learn-intake  ← 件:具体 skill
 ```
 
-以后新的系列进同一个箱,安装命令永远不变。
+以后新的系列进同一个箱,安装命令永远不变。对你的 agent 说「会客厅skill」即可唤起。
 
 ## 为什么有 lulu-learn
 

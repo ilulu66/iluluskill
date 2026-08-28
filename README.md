@@ -1,4 +1,4 @@
-# luluskill
+# iluluskill
 
 > Lulu 的开源 skill 总箱。首发系列:**lulu-learn 学习工坊**——把一场 3 小时的讲座,做成一份可回访的学习资产。
 > 别人做压缩,我们做加工——压缩丢真相,加工保真相。
@@ -8,7 +8,7 @@
 ## 命名三层
 
 ```
-luluskill                 ← 总箱(本仓库,一条命令装全家)
+iluluskill                 ← 总箱(本仓库,一条命令装全家)
 └── lulu-learn            ← 系列:学习工坊(讲座/课程/工作坊/书)
     └── lulu-learn-intake ← 件:具体 skill
 ```
@@ -37,7 +37,7 @@ luluskill                 ← 总箱(本仓库,一条命令装全家)
 ## 安装
 
 ```bash
-npx -y skills add ilulu66/luluskill -g --all
+npx -y skills add ilulu66/iluluskill -g --all
 ```
 
 装好后对你的 agent 说「讲座整理」,或直接粘一个腾讯会议录制分享链接。

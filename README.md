@@ -50,9 +50,18 @@ skills/
 ├── lulu-learn-weave/SKILL.md
 │   └── scripts/verify_quotes.py
 └── lulu-learn-board/SKILL.md
+
+assets/
+└── lulu-wechat-qr.png       # 联系 Lulu
 ```
 
 安装器读取每个子目录中的 `SKILL.md`;不要只下载仓库根目录的 README。
+
+## 联系 Lulu
+
+想交流讲座整理、AI Agent 或 Skill 开源，欢迎扫码添加微信：
+
+![Lulu 微信二维码](assets/lulu-wechat-qr.png)
 
 ## 安装
 

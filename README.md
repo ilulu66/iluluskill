@@ -4,7 +4,7 @@
 > 首发系列:**lulu-learn 学习工坊**——把一场 3 小时的讲座,做成一份可回访的学习资产。
 > 别人做压缩,我们做加工——压缩丢真相,加工保真相。
 
-**状态:v0.1 建设中(首发快照预计 2026-09-12)。**
+**状态:v0.1 可安装核心快照(2026-08-29)。**明档的可视化 HTML 仍在迭代,当前发布的是数据契约版。
 
 ## 命名三层
 
@@ -35,6 +35,24 @@ iluluskill / 会客厅skill   ← 总箱(本仓库,一条命令装全家)
 | `lulu-learn-atom` | 切件装盒 | 每个论点提炼成独立可检索的知识原子,项目内成库、可选汇入你的全局库 |
 | `lulu-learn-weave` | 出菜 | 五大判断/议题线/观点地图 → 显式验收 checklist → 按去向脱敏发布 |
 | `lulu-learn-board` | 明档 | 2.5D 后厨可视化,看着你的讲座被加工(真数据驱动,非演示动画) |
+
+> 说明:流程图里的 8 个站点是工艺阶段,不是 8 个独立 Skill。6 个 Skill 负责把 8 个阶段串起来;`lulu-learn-board` 当前先发布状态数据契约。
+
+## 仓库结构
+
+```text
+skills/
+├── lulu-learn/SKILL.md
+├── lulu-learn-intake/SKILL.md
+│   └── scripts/fetch_tencent_minutes.py
+├── lulu-learn-decompose/SKILL.md
+├── lulu-learn-atom/SKILL.md
+├── lulu-learn-weave/SKILL.md
+│   └── scripts/verify_quotes.py
+└── lulu-learn-board/SKILL.md
+```
+
+安装器读取每个子目录中的 `SKILL.md`;不要只下载仓库根目录的 README。
 
 ## 安装
 

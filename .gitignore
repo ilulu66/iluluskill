@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# 本地运行产物
+_board/status.json
+逐字稿-*.md

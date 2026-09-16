@@ -1,0 +1,87 @@
+{
+  "skill_version": "2.1.1",
+  "interaction": "reuse_confirmed_choices_ask_only_material_unknowns_follow_host_tool_rules",
+  "scene_intent": null,
+  "references": {
+    "source_photo": null,
+    "style_reference": null,
+    "layout_reference": null,
+    "background_reference": null,
+    "approved_base": null,
+    "approved_chibi": null
+  },
+  "background": {
+    "mode": "preserve",
+    "scene": null,
+    "cleanup_targets": []
+  },
+  "composition": {
+    "mode": "preserve",
+    "aspect_ratio": "original",
+    "allow_padding": false,
+    "allow_subject_pose_change": false,
+    "foreground_group": "subjects_and_story_critical_props",
+    "plan": null
+  },
+  "look": {
+    "preset": "neutral-cool",
+    "retouch": "minimal_non_generative"
+  },
+  "identity": {
+    "mode": "source_structure_lock",
+    "privacy": "preserve"
+  },
+  "protection": {
+    "foreground_keep_mask": null,
+    "overlay_exclusion_mask": null,
+    "overlay_exclusion_boxes": [],
+    "coordinate_system": "EXIF_normalized_base_pixels",
+    "note": "Restore foreground: 255 keeps reference, 0 uses background. Overlay exclusion: any nonzero forbids sticker; clothing/lower hair may overlap unless user forbids."
+  },
+  "chibi": {
+    "enabled": true,
+    "position": "bottom_right",
+    "scope": "all_main_subjects_confirm_large_groups",
+    "priorities": [
+      "scene_and_action",
+      "approved_character_design",
+      "appropriate_full_body_display"
+    ],
+    "full_body_preference": true,
+    "proportions": {
+      "mode": "approved_visual_reference_first",
+      "head_to_body_starting_range_without_reference": "1:1.5–1:2",
+      "definition": "head crown to chin : unfolded chin to soles; never measure seated bounding box, long hair, or furniture"
+    },
+    "pose": "match_scene_action_gaze_expression_and_prop_interaction",
+    "style": "rounded_2D_chibi_unless_reference_specified",
+    "width_ratio": 0.3,
+    "min_width_ratio": 0.22,
+    "max_height_ratio": 0.5,
+    "max_inset_ratio": 0.12,
+    "safe_margin_short_edge_ratio": 0.035,
+    "unseen_outfit": "reuse_authorization_or_ask_if_needed",
+    "decoration": "minimal_reference_compatible",
+    "text": "none"
+  },
+  "canvas": {
+    "border": "none",
+    "right_extra_padding_px": 0
+  },
+  "qa": {
+    "technical": "pending",
+    "visual": "pending",
+    "user_acceptance": "pending",
+    "delivery_status": "in_progress"
+  },
+  "output": {
+    "per_image": [
+      "base.png",
+      "chibi.png",
+      "final.png",
+      "job.json",
+      "qa.json"
+    ],
+    "overwrite_sources": false
+  }
+}

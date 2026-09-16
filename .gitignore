@@ -8,3 +8,12 @@ __pycache__/
 # 本地运行产物
 _board/status.json
 逐字稿-*.md
+
+# 照片Skill的本地素材与运行环境
+.venv/
+venv/
+skills/cool-chibi-photo/input/
+skills/cool-chibi-photo/output/
+skills/cool-chibi-photo/work/
+skills/cool-chibi-photo/runs/
+skills/cool-chibi-photo/tmp/

@@ -1,0 +1,32 @@
+name: Photo skill checks
+
+on:
+  push:
+    paths:
+      - 'skills/cool-chibi-photo/**'
+      - 'tools/check_cool_chibi_package.py'
+      - '.github/workflows/cool-chibi-photo.yml'
+  pull_request:
+    paths:
+      - 'skills/cool-chibi-photo/**'
+      - 'tools/check_cool_chibi_package.py'
+      - '.github/workflows/cool-chibi-photo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.10', '3.12', '3.13']
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -r skills/cool-chibi-photo/requirements.txt
+      - run: python -m unittest discover -s skills/cool-chibi-photo/tests -v
+      - run: python tools/check_cool_chibi_package.py

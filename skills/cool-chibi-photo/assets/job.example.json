@@ -1,0 +1,140 @@
+{
+  "example_only": true,
+  "skill_version": "2.1.1",
+  "source_photo": "input/cafe.jpg",
+  "source_sha256": null,
+  "hash_note": "Run SHA-256 on the real source before editing; null means not yet read.",
+  "references": {
+    "source_photo": {
+      "path": "input/cafe.jpg",
+      "role": "identity_visible_outfit_scene_action"
+    },
+    "style_reference": {
+      "path": "references/chibi-design.png",
+      "role": "linework_face_design_body_proportions_only"
+    },
+    "layout_reference": null,
+    "background_reference": null,
+    "approved_base": null,
+    "approved_chibi": null
+  },
+  "scene_intent": "坐在咖啡桌旁喝饮品，抬起另一只手顺手比耶。",
+  "options": {
+    "background": "cleanup",
+    "composition": "light_optimize",
+    "look": "neutral-cool",
+    "identity": "source_structure_lock",
+    "privacy": "preserve",
+    "allow_padding": false,
+    "border": "none",
+    "chibi_scope": [
+      "P01"
+    ]
+  },
+  "authorization": {
+    "background_cleanup": "用户选择B，清理右上角空包装，不改变咖啡店场景",
+    "composition": "用户选择B，保留桌沿、饮品、手势的轻裁切",
+    "unseen_outfit": "用户允许搭配未见裙子和鞋子；仅用于Q版",
+    "text": false
+  },
+  "subjects": [
+    {
+      "id": "P01",
+      "type": "person",
+      "evidence": {
+        "visible": "深棕长发、米白针织上衣、坐姿、画面右侧手比V、另一手握饮品杯",
+        "user_specified": "保留工作之外的轻松日常感",
+        "authorized_completion": "灰蓝短裙、米白平底鞋；不是原片可见事实"
+      },
+      "pose": {
+        "body": "坐着稍前倾",
+        "head": "微侧向画面左",
+        "gaze": "向画面左",
+        "expression": "闭嘴浅笑，两眼睁开",
+        "image_right_hand": "抬起比V",
+        "other_hand": "握住同款饮品杯"
+      },
+      "props": {
+        "critical": [
+          "饮品杯及握持关系"
+        ],
+        "support": [
+          "小桌面",
+          "简化椅子"
+        ],
+        "optional": []
+      },
+      "chibi_design": {
+        "reference": "references/chibi-design.png",
+        "preserve": [
+          "头与躯干/四肢相对大小",
+          "眼睛画法",
+          "线条和白描边"
+        ],
+        "change": [
+          "按原片改为坐姿",
+          "取消参考自带的眨眼"
+        ],
+        "completion": "沿原角色短腿结构弯曲，桌椅适配人物"
+      }
+    }
+  ],
+  "background_composition_plan": {
+    "reason": "清理已指定杂物并减少画面顶部无信息区域",
+    "keep": "人物及其衣服、手、杯子和必要桌沿",
+    "change": "右上角包装所在背景；有限顶部裁切",
+    "target_aspect": "original",
+    "geometry": "同一裁切作用于整张底图；不移动单独的手或道具",
+    "verify": [
+      "杯子、比V手完整",
+      "光线透视延续",
+      "无人脸重绘"
+    ]
+  },
+  "layout": {
+    "coordinate_system": "EXIF校正后base.png像素；合成前重新标注禁区",
+    "crop_ltrb": null,
+    "padding_ltrb_px": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "foreground_keep_mask": "work/keep_foreground.png",
+    "foreground_mask_semantics": "255=保留非生成式底图前景；0=允许背景",
+    "overlay_exclusion_mask": "work/no_overlay.png",
+    "overlay_mask_semantics": "非零=禁止贴纸覆盖；只圈脸、主要手势与核心互动区域，不直接复制全前景蒙版",
+    "protect_boxes": [],
+    "width_ratio": 0.3,
+    "min_width_ratio": 0.22,
+    "max_inset_ratio": 0.12
+  },
+  "generation": {
+    "actual_prompt": null,
+    "reference_paths_actually_passed": [],
+    "note": "执行时记录实际提示词及传入文件；本示例未生成"
+  },
+  "qa": {
+    "technical": {
+      "status": "pending",
+      "checks": [
+        "source_hash_unchanged",
+        "true_alpha",
+        "exclusion_pixels_preserved",
+        "margin_and_readable_size"
+      ]
+    },
+    "visual": {
+      "status": "pending",
+      "checks": [
+        "scene_intent",
+        "action_gaze_expression",
+        "reference_design",
+        "outfit_anatomy",
+        "background_and_composition"
+      ]
+    },
+    "user_acceptance": "pending",
+    "delivery_status": "in_progress"
+  }
+}

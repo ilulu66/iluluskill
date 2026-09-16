@@ -1,11 +1,12 @@
 # iluluskill · 会客厅 skill
 
 > Lulu 的开源 skill 总箱,中文名「**会客厅 skill**」(出自「Lulu 的会客厅」)。
-> 两个系列:
+> 当前包含两个系列和一件独立照片工具:
 > - **lulu-learn 学习工坊**——把一场 3 小时的讲座,做成一份可回访的学习资产。别人做压缩,我们做加工:压缩丢真相,加工保真相。
 > - **lulu-consult 咨询流水线**——把一次专业对话,变成客户当天收到的报告 + 一颗进你自己库的经验原子。
+> - **cool-chibi-photo 照片创作**——保留真实照片,在右下角加入还原人物或宠物情境与动作的同款Q版。
 
-**状态:v0.1 可安装核心快照(2026-08-29)。**明档的可视化 HTML 仍在迭代,当前发布的是数据契约版。
+**状态:v0.3 可安装公开快照(2026-09-16),共8个Skill。** 新增 cool-chibi-photo 2.1.1；学习工坊明档仍为数据契约版。
 
 ## 命名三层
 
@@ -13,10 +14,11 @@
 iluluskill / 会客厅skill      ← 总箱(本仓库,一条命令装全家)
 ├── lulu-learn / 学习工坊     ← 系列(讲座/课程/工作坊/书)
 │   └── lulu-learn-intake     ← 件:具体 skill
-└── lulu-consult / 咨询流水线 ← 系列(咨询/售前/访谈/答疑)
+├── lulu-consult / 咨询流水线 ← 系列(咨询/售前/访谈/答疑)
+└── cool-chibi-photo / 照片创作 ← 独立工具(真实照片＋同款Q版)
 ```
 
-以后新的系列进同一个箱,安装命令永远不变。对你的 agent 说「会客厅skill」即可唤起。
+新的系列或独立工具都可进同一个箱,全量安装命令不变。按具体Skill名或下方场景调用,避免不同流程混用。
 
 ## 为什么有 lulu-learn
 
@@ -67,6 +69,22 @@ iluluskill / 会客厅skill      ← 总箱(本仓库,一条命令装全家)
 
 ⚠️ **不适合**:还没有可收费专业能力的人(这是放大器不是发生器)、一次性不打算做第二次的对话、纯执行类交付。
 
+## cool-chibi-photo · 照片创作
+
+上传一张照片，可附画风参考，得到自然调色/按需调整构图的底图、独立透明Q版和合成成品。
+
+它先判断照片里的完整情境：比如“电脑前工作，顺手比耶”，就同时保留电脑、工作手和手势。原照决定内容与动作，参考图决定画风和角色比例；真人与Q版分层制作，修改动作时复用底图。
+
+| Skill | 入口与范围 |
+|---|---|
+| [cool-chibi-photo](skills/cool-chibi-photo/README.md) | 单人AB流程已实测；背景清理/更换、大幅重构、多人/宠物尚未完成端到端实图验证 |
+
+**使用前提**：宿主Agent具备读图与图像生成/编辑能力；本地合成脚本需要Python 3.10+、Pillow和NumPy。安装Skill不会自动获得生图模型或额度。
+
+- [完整说明与安装](skills/cool-chibi-photo/README.md)
+- [背景与构图怎么选](skills/cool-chibi-photo/references/BACKGROUND_COMPOSITION.md)
+- [整体复盘](skills/cool-chibi-photo/references/RETROSPECTIVE.md) · [实际验证范围](skills/cool-chibi-photo/VALIDATION.md)
+
 ## 仓库结构
 
 ```text
@@ -79,11 +97,18 @@ skills/
 ├── lulu-learn-weave/SKILL.md
 │   └── scripts/verify_quotes.py
 ├── lulu-learn-board/SKILL.md
-└── lulu-consult/
+├── lulu-consult/
+│   ├── SKILL.md
+│   ├── config/我的配置.md      # ⭐ 装完先填
+│   ├── agents/                 # 4 个 agent 定义
+│   └── templates/              # 空的案例库模板
+└── cool-chibi-photo/
     ├── SKILL.md
-    ├── config/我的配置.md      # ⭐ 装完先填
-    ├── agents/                 # 4 个 agent 定义
-    └── templates/              # 空的案例库模板
+    ├── README.md               # 从这里开始
+    ├── references/             # 提示词、背景构图、复盘
+    ├── assets/                 # 可替换的设置与任务示例
+    ├── scripts/                # 本地调色、恢复与合成
+    └── tests/                  # 确定性回归检查
 
 assets/
 └── lulu-wechat-qr.png       # 联系 Lulu
@@ -103,7 +128,17 @@ assets/
 npx -y skills add ilulu66/iluluskill -g --all
 ```
 
-装好后对你的 agent 说「讲座整理」,或直接粘一个腾讯会议录制分享链接。
+只安装照片工具：
+
+```bash
+npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo
+```
+
+| 你想做什么 | 装好后怎么说 |
+|---|---|
+| 整理讲座 | “讲座整理”，或提供会议录制分享链接 |
+| 咨询准备/复盘 | 先填写咨询配置，再调用 lulu-consult |
+| 真人照片＋Q版 | 上传照片，说“按 cool-chibi-photo 处理，背景A、构图B” |
 
 ## Roadmap
 

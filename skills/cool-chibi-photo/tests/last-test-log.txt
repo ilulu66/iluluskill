@@ -1,0 +1,33 @@
+test_cli_help (test_photo_ops.PhotoOpsTests.test_cli_help) ... ok
+test_cli_overlay_mask_and_report (test_photo_ops.PhotoOpsTests.test_cli_overlay_mask_and_report) ... ok
+test_compose_safe_margin (test_photo_ops.PhotoOpsTests.test_compose_safe_margin) ... ok
+test_crop_rejects_lost_overlay_mask (test_photo_ops.PhotoOpsTests.test_crop_rejects_lost_overlay_mask) ... ok
+test_crop_rejects_lost_subject (test_photo_ops.PhotoOpsTests.test_crop_rejects_lost_subject) ... ok
+test_dimension_mismatch_rejected (test_photo_ops.PhotoOpsTests.test_dimension_mismatch_rejected) ... ok
+test_empty_mask_rejected (test_photo_ops.PhotoOpsTests.test_empty_mask_rejected) ... ok
+test_grade_shape_and_change (test_photo_ops.PhotoOpsTests.test_grade_shape_and_change) ... ok
+test_install_backup (test_photo_ops.PhotoOpsTests.test_install_backup) ... ok
+test_install_excludes_local_runtime_and_private_files (test_photo_ops.PhotoOpsTests.test_install_excludes_local_runtime_and_private_files) ... ok
+test_invalid_grade_parameters (test_photo_ops.PhotoOpsTests.test_invalid_grade_parameters) ... ok
+test_layout_report_cannot_overwrite_protection_input (test_photo_ops.PhotoOpsTests.test_layout_report_cannot_overwrite_protection_input) ... ok
+test_local_inset_keeps_readable_target_size (test_photo_ops.PhotoOpsTests.test_local_inset_keeps_readable_target_size) ... ok
+test_minimum_readable_size_not_silently_violated (test_photo_ops.PhotoOpsTests.test_minimum_readable_size_not_silently_violated) ... ok
+test_none_is_exact (test_photo_ops.PhotoOpsTests.test_none_is_exact) ... ok
+test_overlay_mask_and_boxes_union (test_photo_ops.PhotoOpsTests.test_overlay_mask_and_boxes_union) ... ok
+test_overlay_mask_crop_and_padding_coordinates (test_photo_ops.PhotoOpsTests.test_overlay_mask_crop_and_padding_coordinates) ... ok
+test_overlay_mask_invalid_inputs (test_photo_ops.PhotoOpsTests.test_overlay_mask_invalid_inputs) ... ok
+test_overwrite_denied (test_photo_ops.PhotoOpsTests.test_overwrite_denied) ... ok
+test_padding_no_resample (test_photo_ops.PhotoOpsTests.test_padding_no_resample) ... ok
+test_padding_resolves_conflict (test_photo_ops.PhotoOpsTests.test_padding_resolves_conflict) ... ok
+test_protected_zone_blocks (test_photo_ops.PhotoOpsTests.test_protected_zone_blocks) ... ok
+test_restore_core_exact (test_photo_ops.PhotoOpsTests.test_restore_core_exact) ... ok
+test_restore_soft_edge (test_photo_ops.PhotoOpsTests.test_restore_soft_edge) ... ok
+test_transparent_sticker_region_can_cross_exclusion (test_photo_ops.PhotoOpsTests.test_transparent_sticker_region_can_cross_exclusion) ... ok
+test_true_alpha_check (test_photo_ops.PhotoOpsTests.test_true_alpha_check) ... ok
+test_verify_change_detected (test_photo_ops.PhotoOpsTests.test_verify_change_detected) ... ok
+test_zero_strength_is_exact (test_photo_ops.PhotoOpsTests.test_zero_strength_is_exact) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 1.060s
+
+OK

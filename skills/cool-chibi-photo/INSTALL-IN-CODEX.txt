@@ -1,0 +1,14 @@
+公开仓库： https://github.com/ilulu66/iluluskill
+单独安装： npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo
+
+以下用于手动安装完整下载包：
+
+请安装我提供的 cool-chibi-photo-v2.1.1.zip：
+
+1. 检查压缩包路径，安全解压；读取 cool-chibi-photo/SKILL.md 和 references/CODEX_SETUP.md，确认 name 为 cool-chibi-photo、version 为2.1.1。
+2. 先定位已有同名安装：包括 ~/.codex/skills、~/.agents/skills 和当前项目已配置的技能目录。已有活动安装时，在活动skills目录外备份后原位升级，避免新建第二份同名技能。不擅自删除其他安装或改AGENTS.md、全局配置、API密钥。
+3. 全新安装可使用包内 scripts/install.py --dry-run；确认目标后安装。脚本默认写 ~/.agents/skills；--replace 会先备份该目标的旧版，--project 可指定项目。它不会自动发现或升级 ~/.codex 中的安装。
+4. 检查当前会话真实的图像读取、生成/编辑与合成能力；有imagegen技能时读取其说明，服从实际工具接口，不编造模型参数。
+5. 利用现有可用依赖或独立虚拟环境运行脚本测试，不用sudo、不改系统Python。校验SHA256SUMS.txt与包内文件一致。
+6. 报告安装位置、版本、同名冲突及实际验证结果。现在只安装和自检，不生成图片。
+7. 后续“按 cool-chibi-photo 处理”时沿用已确认选项；原照片负责情境与动作，画风参考负责角色设计；按授权处理背景与构图、独立生成Q版后合成。技术检查与视觉验收分别记录。

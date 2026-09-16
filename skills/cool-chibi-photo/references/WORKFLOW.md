@@ -64,10 +64,12 @@ padding顺序为左、上、右、下。扩白画布与生成背景延展不同�
 {
   "status": "needs_review",
   "technical_checks": {"files": "pass", "alpha": "pass", "source_unchanged": "pass"},
-  "visual_checks": {"scene_intent": "pending", "pose_and_props": "pending", "style_and_proportions": "pending", "background_and_composition": "pending"},
+  "visual_checks": {"scene_intent": "pending", "pose_and_props": "pending", "style_and_proportions": "pending", "face_occlusion_and_visible_features": "pending", "background_and_composition": "pending"},
   "user_acceptance": "pending",
   "unresolved": []
 }
 ```
+
+面部局部遮挡另查：露出的面部是否被错误留空、眼睛是否落在脸的合理位置、是否穿透手机/手；若调整遮挡物，是否仅限已授权Q版设计且仍读得出原动作。这个检查由目视完成，像素测试不判断是否有眼睛。
 
 上例pending必须由实际视觉检查补齐；未检查时总体仍为needs_review。程序通过不能填视觉pass。用户明确拒绝时更新状态和失败原因，技术检查可保留但不能继续标整图通过。

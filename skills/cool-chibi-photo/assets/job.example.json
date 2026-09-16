@@ -1,6 +1,6 @@
 {
   "example_only": true,
-  "skill_version": "2.1.1",
+  "skill_version": "2.1.2",
   "source_photo": "input/cafe.jpg",
   "source_sha256": null,
   "hash_note": "Run SHA-256 on the real source before editing; null means not yet read.",
@@ -52,7 +52,12 @@
         "gaze": "向画面左",
         "expression": "闭嘴浅笑，两眼睁开",
         "image_right_hand": "抬起比V",
-        "other_hand": "握住同款饮品杯"
+        "other_hand": "握住同款饮品杯",
+        "face_occlusion": {
+          "occluded_regions": "无",
+          "visible_features": "双眼与眉毛可见，按原照位置和视线绘制",
+          "authorized_chibi_adjustment": "无"
+        }
       },
       "props": {
         "critical": [
@@ -131,7 +136,8 @@
         "action_gaze_expression",
         "reference_design",
         "outfit_anatomy",
-        "background_and_composition"
+        "background_and_composition",
+        "face_occlusion_and_visible_features"
       ]
     },
     "user_acceptance": "pending",

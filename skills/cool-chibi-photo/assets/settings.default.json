@@ -1,5 +1,5 @@
 {
-  "skill_version": "2.1.1",
+  "skill_version": "2.1.2",
   "interaction": "reuse_confirmed_choices_ask_only_material_unknowns_follow_host_tool_rules",
   "scene_intent": null,
   "references": {
@@ -62,7 +62,13 @@
     "safe_margin_short_edge_ratio": 0.035,
     "unseen_outfit": "reuse_authorization_or_ask_if_needed",
     "decoration": "minimal_reference_compatible",
-    "text": "none"
+    "text": "none",
+    "face_occlusion": {
+      "preserve_visible_features": true,
+      "adjust_occluder": "only_in_chibi_with_user_direction",
+      "fully_occluded_features": "do_not_force_visible",
+      "privacy_request": "preserve"
+    }
   },
   "canvas": {
     "border": "none",

@@ -1,5 +1,5 @@
 interface:
-  display_name: "Cool Chibi Photo 2.1.1"
+  display_name: "Cool Chibi Photo 2.1.2"
   short_description: "保留原照主体，按情境还原同款Q版，支持参考画风、背景调整与重新构图"
   default_prompt: "使用 $cool-chibi-photo 处理我的照片。沿用已选设置，先识别情境和动作，按参考图锁定Q版设计；保留原照主体，按授权调整背景与构图，分别输出底图、透明贴纸和成品。"
 policy:

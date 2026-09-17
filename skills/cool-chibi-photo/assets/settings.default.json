@@ -1,5 +1,5 @@
 {
-  "skill_version": "2.1.2",
+  "skill_version": "2.2.0",
   "interaction": "reuse_confirmed_choices_ask_only_material_unknowns_follow_host_tool_rules",
   "scene_intent": null,
   "references": {
@@ -13,7 +13,14 @@
   "background": {
     "mode": "preserve",
     "scene": null,
-    "cleanup_targets": []
+    "cleanup_targets": [],
+    "refinement": {
+      "mode": "assess_then_subtle_local_tone",
+      "problem_limit": 3,
+      "preserve_objects": true,
+      "preserve_texture": true,
+      "before_after_review": true
+    }
   },
   "composition": {
     "mode": "preserve",
@@ -21,7 +28,11 @@
     "allow_padding": false,
     "allow_subject_pose_change": false,
     "foreground_group": "subjects_and_story_critical_props",
-    "plan": null
+    "plan": null,
+    "portrait_candidates_when_authorized": [
+      "4:5",
+      "3:4"
+    ]
   },
   "look": {
     "preset": "neutral-cool",
@@ -88,6 +99,23 @@
       "job.json",
       "qa.json"
     ],
-    "overwrite_sources": false
+    "overwrite_sources": false,
+    "optional_per_image": [
+      "decor.png"
+    ]
+  },
+  "decoration": {
+    "enabled": false,
+    "activation": "reuse_user_request_or_explicitly_approved_layout_style",
+    "density": "light",
+    "element_count_starting_range": [
+      2,
+      5
+    ],
+    "caption_mode": "scene_specific_when_authorized",
+    "max_main_captions": 1,
+    "max_secondary_captions": 1,
+    "fixed_text": null,
+    "layer": "decor.png"
   }
 }

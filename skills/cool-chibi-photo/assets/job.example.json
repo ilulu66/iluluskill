@@ -1,6 +1,6 @@
 {
   "example_only": true,
-  "skill_version": "2.1.2",
+  "skill_version": "2.2.0",
   "source_photo": "input/cafe.jpg",
   "source_sha256": null,
   "hash_note": "Run SHA-256 on the real source before editing; null means not yet read.",
@@ -94,7 +94,12 @@
       "杯子、比V手完整",
       "光线透视延续",
       "无人脸重绘"
-    ]
+    ],
+    "tonal_refinement": {
+      "problem": "背景上方反光比主体抢眼",
+      "action": "克制收高光、协调局部偏色，不删除反光对应物体",
+      "check": "人物与背景光向协调，杯子与玻璃纹理仍自然"
+    }
   },
   "layout": {
     "coordinate_system": "EXIF校正后base.png像素；合成前重新标注禁区",
@@ -137,10 +142,23 @@
         "reference_design",
         "outfit_anatomy",
         "background_and_composition",
-        "face_occlusion_and_visible_features"
+        "face_occlusion_and_visible_features",
+        "background_refinement_benefit_and_texture",
+        "caption_spelling_readability",
+        "decoration_density_and_clearance"
       ]
     },
     "user_acceptance": "pending",
     "delivery_status": "in_progress"
+  },
+  "decoration": {
+    "enabled": false,
+    "authorization": null,
+    "caption_mode": null,
+    "actual_main_text": null,
+    "actual_secondary_text": null,
+    "elements": [],
+    "zones": [],
+    "note": "用户开启后按当前照片填实际短句、位置及授权；参考口号不是固定模板"
   }
 }

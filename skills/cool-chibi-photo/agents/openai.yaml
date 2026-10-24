@@ -1,6 +1,6 @@
 interface:
-  display_name: "Cool Chibi Photo 2.2.0"
-  short_description: "保留原照主体，按情境还原同款Q版，支持参考画风、背景调整与重新构图"
-  default_prompt: "使用 $cool-chibi-photo 处理我的照片。沿用已选设置，先识别情境和动作，按参考图锁定Q版设计；保留原照主体，按授权调整背景与构图，分别输出底图、透明贴纸和成品。"
+  display_name: "朋友圈照骗 · Codex 三场景"
+  short_description: "标准版保留真人，按没人入镜、宠物小物互动、人太小替换三个场景加入同款Q版"
+  default_prompt: "用 $cool-chibi-photo 处理这张照片，先看图选标准版或三个场景，沿用已确认设置和参考角色设计，实际调用内置图像工具并交付可评图PNG。"
 policy:
   allow_implicit_invocation: true

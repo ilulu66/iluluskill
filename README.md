@@ -1,12 +1,12 @@
 # iluluskill · 会客厅 skill
 
-> Lulu 的开源 skill 总箱,中文名「**会客厅 skill**」(出自「Lulu 的会客厅」)。
+> Lulu 的公开 skill 总箱,中文名「**会客厅 skill**」(出自「Lulu 的会客厅」)。
 > 当前包含两个系列和一件独立照片工具:
 > - **lulu-learn 学习工坊**——把一场 3 小时的讲座,做成一份可回访的学习资产。别人做压缩,我们做加工:压缩丢真相,加工保真相。
 > - **lulu-consult 咨询流水线**——把一次专业对话,变成客户当天收到的报告 + 一颗进你自己库的经验原子。
-> - **cool-chibi-photo 照片创作**——保留真实照片,在右下角加入还原人物或宠物情境与动作的同款Q版。
+> - **cool-chibi-photo 朋友圈照骗**——标准版保留真人＋同款Q版，新增没拍到我、宠物小物互动、人太小替换三个场景。
 
-**状态:v0.4.0 可安装公开快照(2026-09-17),共8个Skill。** 包含 cool-chibi-photo 2.2.0；学习工坊明档仍为数据契约版。
+**状态：v0.5.0-rc.1 试用版（2026-10-25），共8个Skill。** 照片组件升级至cool-chibi-photo 3.0.0-rc.1，优先适配Codex；学习与咨询组件本轮未改。下载[三场景试用版ZIP](https://github.com/ilulu66/iluluskill/releases/tag/v0.5.0-rc.1)。
 
 ## 命名三层
 
@@ -69,21 +69,25 @@ iluluskill / 会客厅skill      ← 总箱(本仓库,一条命令装全家)
 
 ⚠️ **不适合**:还没有可收费专业能力的人(这是放大器不是发生器)、一次性不打算做第二次的对话、纯执行类交付。
 
-## cool-chibi-photo · 照片创作
+## cool-chibi-photo · 朋友圈照骗三场景版
 
-上传一张照片，可附画风参考，得到自然调色/按需调整构图的底图、独立透明Q版和合成成品。
+给一张已有照片和自己的角色/画风参考，让Q版进入这张照片的具体情境。标准版仍可保留真人、在右下加同款小人；三种新场景按照片内容选择：
 
-它先判断照片里的完整情境：比如“电脑前工作，顺手比耶”，就同时保留电脑、工作手和手势。原照决定内容与动作，参考图决定画风和角色比例；真人与Q版分层制作，修改动作时复用底图。
-
-| Skill | 入口与范围 |
+| 照片情况 | 处理方式 |
 |---|---|
-| [cool-chibi-photo](skills/cool-chibi-photo/README.md) | 单人AB流程已实测；背景清理/更换、大幅重构、多人/宠物尚未完成端到端实图验证 |
+| 没拍到我 | 纯景放角落，有合理位置时让角色坐进台阶、窗边等空间 |
+| 宠物或小物 | 保留真实猫狗/物件，让指定人类Q版入景互动 |
+| 人太小 | 先推荐原位替换，取得本图或本批许可后执行 |
 
-**使用前提**：宿主Agent具备读图与图像生成/编辑能力；本地合成脚本需要Python 3.10+、Pillow和NumPy。安装Skill不会自动获得生图模型或额度。
+画风确实拿不准时，先展示2～3个真实参考，再用宿主支持的选择界面让你选；没有原生选择工具就用文字。已指定、已认可或明确委托决定时继续执行，不重复询问。选择画风不会顺带改变衣服、背景或删人许可。
 
-- [完整说明与安装](skills/cool-chibi-photo/README.md)
-- [背景与构图怎么选](skills/cool-chibi-photo/references/BACKGROUND_COMPOSITION.md)
-- [整体复盘](skills/cool-chibi-photo/references/RETROSPECTIVE.md) · [实际验证范围](skills/cool-chibi-photo/VALIDATION.md)
+**适用环境**：当前优先适配能看图、能调用内置图像生成/编辑工具的Codex会话。路由helper与安装器需Python 3.10+；旧本地合成脚本另需Pillow和NumPy。安装Skill不会附带生图模型、额度或API服务。用自己的原照与参考即可，公开包不含作者私人图库。
+
+**验证范围**：67项软件回归通过；小物互动已取得一张用户认可结果。无人景物尚未完成真实原片生图回归，小人物替换的比例仍待修订；本版标记为试用版，不承诺三场景均稳定通过。整图生成与严格主体保留分开，后者需要实际蒙版、合成和像素核验。
+
+- [照片组件完整说明与安装](skills/cool-chibi-photo/README.md)
+- [Codex首次运行](skills/cool-chibi-photo/references/CODEX_SETUP.md) · [场景路由](skills/cool-chibi-photo/references/SCENARIOS.md)
+- [实际验证范围](skills/cool-chibi-photo/VALIDATION.md)
 
 ## 仓库结构
 
@@ -118,7 +122,7 @@ assets/
 
 ## 联系 Lulu
 
-想交流讲座整理、AI Agent 或 Skill 开源，欢迎扫码添加微信：
+想交流讲座整理、AI Agent 或 Skill，或洽谈商业授权，欢迎扫码添加微信：
 
 ![Lulu 微信二维码](assets/lulu-wechat-qr.png)
 
@@ -128,17 +132,19 @@ assets/
 npx -y skills add ilulu66/iluluskill -g --all
 ```
 
-只安装照片工具：
+只把新版照片工具安装到Codex（首次安装，需Node.js/npm提供npx）：
 
 ```bash
-npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo
+npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo --agent codex -y
 ```
+
+已有`~/.codex/skills/cool-chibi-photo`时，下载上述ZIP后在组件目录运行`python3 scripts/install.py --codex --replace`，先备份再原位更新，避免留下另一种方式安装的同名副本。安装后开新的Codex对话，附原照和自己的参考即可。详细位置与依赖见[安装说明](skills/cool-chibi-photo/references/CODEX_SETUP.md)。
 
 | 你想做什么 | 装好后怎么说 |
 |---|---|
 | 整理讲座 | “讲座整理”，或提供会议录制分享链接 |
 | 咨询准备/复盘 | 先填写咨询配置，再调用 lulu-consult |
-| 真人照片＋Q版 | 上传照片，说“按 cool-chibi-photo 处理，背景A、构图B” |
+| 照片三场景＋Q版 | 附原照与参考，说“用 $cool-chibi-photo，让小人坐在玩偶旁边，保留真实玩偶，不加文字” |
 
 ## Roadmap
 
@@ -146,7 +152,13 @@ npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo
 
 ## License
 
-代码 MIT;文档与方法论 CC BY-NC 4.0。
+**个人学习、研究免费；商业用途需授权付费。**
+
+- 代码:PolyForm Noncommercial 1.0.0;文档与方法论:CC BY-NC 4.0。
+- 公司内部使用、给客户交付服务、放进付费课程/社群、集成进产品,都算商业用途,请先扫上方二维码联系 Lulu 取得书面授权。
+- v0.4.0 及更早版本的代码按当时的 MIT 发布,旧版本仍适用原授权。
+
+详见 [LICENSE.md](LICENSE.md)。
 
 ---
 

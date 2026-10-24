@@ -10,12 +10,14 @@ import sys
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--project', type=Path, help='Use PROJECT/.agents/skills instead of ~/.agents/skills.')
+    location = parser.add_mutually_exclusive_group()
+    location.add_argument('--project', type=Path, help='Use PROJECT/.agents/skills instead of ~/.agents/skills.')
+    location.add_argument('--codex', action='store_true', help='Use ~/.codex/skills with backups in ~/.codex/skill-backups.')
     parser.add_argument('--replace', action='store_true', help='Back up an existing same-name folder before installing.')
     parser.add_argument('--dry-run', action='store_true')
     args = parser.parse_args()
     source = Path(__file__).resolve().parents[1]
-    home = (args.project.expanduser().resolve() if args.project else Path.home()) / '.agents'
+    home = Path.home() / '.codex' if args.codex else (args.project.expanduser().resolve() if args.project else Path.home()) / '.agents'
     target = home / 'skills' / source.name
     stamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')
     backup = home / 'skill-backups' / f'{source.name}_{stamp}'
@@ -43,7 +45,8 @@ def main() -> int:
         staging.parent.mkdir(parents=True, exist_ok=True)
         shutil.copytree(source, staging, ignore=shutil.ignore_patterns(
             '__pycache__', '*.pyc', '.DS_Store', '.git', '.venv', 'venv',
-            '.env', '.env.*', '00-协作台账.md', 'input', 'output', 'work', 'runs', 'tmp'))
+            '.env', '.env.*', '00-协作台账.md', 'local-profile.json', 'local-reference-profile.json',
+            'job.json', 'qa.json', 'input', 'output', 'work', 'runs', 'tmp'))
         moved = False
         try:
             if target.exists():

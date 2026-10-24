@@ -1,121 +1,79 @@
 {
-  "skill_version": "2.2.0",
-  "interaction": "reuse_confirmed_choices_ask_only_material_unknowns_follow_host_tool_rules",
-  "scene_intent": null,
-  "references": {
-    "source_photo": null,
-    "style_reference": null,
-    "layout_reference": null,
-    "background_reference": null,
-    "approved_base": null,
-    "approved_chibi": null
+  "skill_version": "3.0.0-rc.1",
+  "schema_status": "policy_defaults_not_a_job",
+  "note": "Reference policy; codex_job.py does not automatically load this file. Build each job from job.example.json after reviewing the actual inputs.",
+  "scenario": "standard",
+  "background_render_style": "photo",
+  "decoration": "clean",
+  "add_text": false,
+  "text": "",
+  "replace_real_person": false,
+  "inputs_reviewed": false,
+  "edit_scope": "visual",
+  "references": [],
+  "placement_defaults": {
+    "standard": "corner",
+    "no_person": "corner_unless_authorized_scene_contact",
+    "pet_object": "in_scene",
+    "small_person": "in_scene_after_replacement_authorization"
   },
-  "background": {
-    "mode": "preserve",
-    "scene": null,
-    "cleanup_targets": [],
-    "refinement": {
-      "mode": "assess_then_subtle_local_tone",
-      "problem_limit": 3,
-      "preserve_objects": true,
-      "preserve_texture": true,
-      "before_after_review": true
-    }
+  "chibi_policy": {
+    "count": "selected_subjects_only_not_fixed_two",
+    "outfit": "current_source_or_explicit_batch_mapping",
+    "proportions": "approved_reference_first_short_body_without_stretching",
+    "new_design_head_to_body_target_without_reference": "about_1_to_1_not_an_automatic_measurement",
+    "outline": "chosen_reference_and_placement_no_mandatory_thick_white_border",
+    "body_visibility": "readable_action_then_approved_proportions_allow_authorized_partial_occlusion"
   },
-  "composition": {
-    "mode": "preserve",
-    "aspect_ratio": "original",
-    "allow_padding": false,
-    "allow_subject_pose_change": false,
-    "foreground_group": "subjects_and_story_critical_props",
-    "plan": null,
-    "portrait_candidates_when_authorized": [
-      "4:5",
-      "3:4"
-    ]
+  "pet_object_policy": "preserve_real_pet_or_object_add_selected_human_chibi_interaction_unless_user_selects_pet_chibi",
+  "background_policy": "soft_illustrated_only_when_user_or_explicit_overall_reference_authorizes_it_no_automatic_scene_replacement",
+  "reference_policy": {
+    "allowed_roles": [
+      "identity",
+      "style",
+      "layout",
+      "overall"
+    ],
+    "require_use_for": true,
+    "view_every_selected_input_before_generation": true,
+    "private_profile": "local_only_not_distributed"
   },
-  "look": {
-    "preset": "neutral-cool",
-    "retouch": "minimal_non_generative"
+  "output_policy": {
+    "source_read_only": true,
+    "one_source_one_run": true,
+    "fake_empty_layers": false,
+    "visual_edit": "final_png_and_actual_job_qa_no_pixel_lock_claim",
+    "strict_subject": "standard_asset_then_local_composition_and_actual_protection_verification"
   },
-  "identity": {
-    "mode": "source_structure_lock",
-    "privacy": "preserve"
+  "qa": {
+    "technical": "not_run",
+    "visual": "pending",
+    "user_acceptance": "pending",
+    "three_scenario_regression": "not_yet_all_passed"
   },
-  "protection": {
-    "foreground_keep_mask": null,
-    "overlay_exclusion_mask": null,
-    "overlay_exclusion_boxes": [],
-    "coordinate_system": "EXIF_normalized_base_pixels",
-    "note": "Restore foreground: 255 keeps reference, 0 uses background. Overlay exclusion: any nonzero forbids sticker; clothing/lower hair may overlap unless user forbids."
+  "style_selection": "resolved",
+  "style_options": [],
+  "style_selection_policy": {
+    "needed_only_when": "genuinely_uncertain_and_no_explicit_style_approved_reference_batch_lock_or_delegation",
+    "show_actual_references_first": true,
+    "candidate_count_for_native_picker": "2_to_3_actual_options_no_fixed_presets",
+    "insufficient_actual_references": "show_actual_count_and_clarify_in_text_do_not_invent_options",
+    "native_picker": "use_current_available_native_choice_tool_questions_title_options_otherwise_text",
+    "needed_status": "style_choice_needed_no_imagegen_request",
+    "unanswered_or_timeout": "remain_waiting_never_select_first",
+    "answer": "new_plan_resolved_selected_reference_and_use_for_preserve_other_choices",
+    "confirmed_or_delegated": "do_not_ask_again_within_confirmed_scope",
+    "changes_only": "character_rendering_style_not_scenario_background_outfit_or_removal_permission",
+    "acceptance_scope": "specific_result_and_confirmed_batch_style_not_all_references_or_future_jobs"
   },
   "chibi": {
     "enabled": true,
     "position": "bottom_right",
-    "scope": "all_main_subjects_confirm_large_groups",
-    "priorities": [
-      "scene_and_action",
-      "approved_character_design",
-      "appropriate_full_body_display"
-    ],
-    "full_body_preference": true,
-    "proportions": {
-      "mode": "approved_visual_reference_first",
-      "head_to_body_starting_range_without_reference": "1:1.5–1:2",
-      "definition": "head crown to chin : unfolded chin to soles; never measure seated bounding box, long hair, or furniture"
-    },
-    "pose": "match_scene_action_gaze_expression_and_prop_interaction",
-    "style": "rounded_2D_chibi_unless_reference_specified",
     "width_ratio": 0.3,
     "min_width_ratio": 0.22,
     "max_height_ratio": 0.5,
     "max_inset_ratio": 0.12,
     "safe_margin_short_edge_ratio": 0.035,
-    "unseen_outfit": "reuse_authorization_or_ask_if_needed",
-    "decoration": "minimal_reference_compatible",
-    "text": "none",
-    "face_occlusion": {
-      "preserve_visible_features": true,
-      "adjust_occluder": "only_in_chibi_with_user_direction",
-      "fully_occluded_features": "do_not_force_visible",
-      "privacy_request": "preserve"
-    }
-  },
-  "canvas": {
-    "border": "none",
-    "right_extra_padding_px": 0
-  },
-  "qa": {
-    "technical": "pending",
-    "visual": "pending",
-    "user_acceptance": "pending",
-    "delivery_status": "in_progress"
-  },
-  "output": {
-    "per_image": [
-      "base.png",
-      "chibi.png",
-      "final.png",
-      "job.json",
-      "qa.json"
-    ],
-    "overwrite_sources": false,
-    "optional_per_image": [
-      "decor.png"
-    ]
-  },
-  "decoration": {
-    "enabled": false,
-    "activation": "reuse_user_request_or_explicitly_approved_layout_style",
-    "density": "light",
-    "element_count_starting_range": [
-      2,
-      5
-    ],
-    "caption_mode": "scene_specific_when_authorized",
-    "max_main_captions": 1,
-    "max_secondary_captions": 1,
-    "fixed_text": null,
-    "layer": "decor.png"
+    "note": "Legacy photo_ops.py compose defaults only; in-scene generation uses the job placement and chibi_policy, not these corner limits."
   }
 }

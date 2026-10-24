@@ -1,164 +1,27 @@
 {
   "example_only": true,
-  "skill_version": "2.2.0",
-  "source_photo": "input/cafe.jpg",
-  "source_sha256": null,
-  "hash_note": "Run SHA-256 on the real source before editing; null means not yet read.",
-  "references": {
-    "source_photo": {
-      "path": "input/cafe.jpg",
-      "role": "identity_visible_outfit_scene_action"
-    },
-    "style_reference": {
-      "path": "references/chibi-design.png",
-      "role": "linework_face_design_body_proportions_only"
-    },
-    "layout_reference": null,
-    "background_reference": null,
-    "approved_base": null,
-    "approved_chibi": null
-  },
-  "scene_intent": "坐在咖啡桌旁喝饮品，抬起另一只手顺手比耶。",
-  "options": {
-    "background": "cleanup",
-    "composition": "light_optimize",
-    "look": "neutral-cool",
-    "identity": "source_structure_lock",
-    "privacy": "preserve",
-    "allow_padding": false,
-    "border": "none",
-    "chibi_scope": [
-      "P01"
-    ]
-  },
-  "authorization": {
-    "background_cleanup": "用户选择B，清理右上角空包装，不改变咖啡店场景",
-    "composition": "用户选择B，保留桌沿、饮品、手势的轻裁切",
-    "unseen_outfit": "用户允许搭配未见裙子和鞋子；仅用于Q版",
-    "text": false
-  },
-  "subjects": [
+  "skill_version": "3.0.0-rc.1",
+  "source_photo": "input/source.jpg",
+  "output_dir": "runs/example-001",
+  "scenario": "standard",
+  "placement": "corner",
+  "scene_intent": "填写本图实际情境：谁在何处做什么，与哪件道具互动。",
+  "subject_details": "填写已选主角数量、当前衣服、动作、视线、表情、遮挡和关键道具；区分原片可见、用户说明、获准设计补全。",
+  "references": [
     {
-      "id": "P01",
-      "type": "person",
-      "evidence": {
-        "visible": "深棕长发、米白针织上衣、坐姿、画面右侧手比V、另一手握饮品杯",
-        "user_specified": "保留工作之外的轻松日常感",
-        "authorized_completion": "灰蓝短裙、米白平底鞋；不是原片可见事实"
-      },
-      "pose": {
-        "body": "坐着稍前倾",
-        "head": "微侧向画面左",
-        "gaze": "向画面左",
-        "expression": "闭嘴浅笑，两眼睁开",
-        "image_right_hand": "抬起比V",
-        "other_hand": "握住同款饮品杯",
-        "face_occlusion": {
-          "occluded_regions": "无",
-          "visible_features": "双眼与眉毛可见，按原照位置和视线绘制",
-          "authorized_chibi_adjustment": "无"
-        }
-      },
-      "props": {
-        "critical": [
-          "饮品杯及握持关系"
-        ],
-        "support": [
-          "小桌面",
-          "简化椅子"
-        ],
-        "optional": []
-      },
-      "chibi_design": {
-        "reference": "references/chibi-design.png",
-        "preserve": [
-          "头与躯干/四肢相对大小",
-          "眼睛画法",
-          "线条和白描边"
-        ],
-        "change": [
-          "按原片改为坐姿",
-          "取消参考自带的眨眼"
-        ],
-        "completion": "沿原角色短腿结构弯曲，桌椅适配人物"
-      }
+      "path": "input/approved-chibi-style.png",
+      "role": "style",
+      "use_for": "只参考实际认可的线条、五官概括与角色比例；衣服和动作按本图，不复制参考的家具或文案。"
     }
   ],
-  "background_composition_plan": {
-    "reason": "清理已指定杂物并减少画面顶部无信息区域",
-    "keep": "人物及其衣服、手、杯子和必要桌沿",
-    "change": "右上角包装所在背景；有限顶部裁切",
-    "target_aspect": "original",
-    "geometry": "同一裁切作用于整张底图；不移动单独的手或道具",
-    "verify": [
-      "杯子、比V手完整",
-      "光线透视延续",
-      "无人脸重绘"
-    ],
-    "tonal_refinement": {
-      "problem": "背景上方反光比主体抢眼",
-      "action": "克制收高光、协调局部偏色，不删除反光对应物体",
-      "check": "人物与背景光向协调，杯子与玻璃纹理仍自然"
-    }
-  },
-  "layout": {
-    "coordinate_system": "EXIF校正后base.png像素；合成前重新标注禁区",
-    "crop_ltrb": null,
-    "padding_ltrb_px": [
-      0,
-      0,
-      0,
-      0
-    ],
-    "foreground_keep_mask": "work/keep_foreground.png",
-    "foreground_mask_semantics": "255=保留非生成式底图前景；0=允许背景",
-    "overlay_exclusion_mask": "work/no_overlay.png",
-    "overlay_mask_semantics": "非零=禁止贴纸覆盖；只圈脸、主要手势与核心互动区域，不直接复制全前景蒙版",
-    "protect_boxes": [],
-    "width_ratio": 0.3,
-    "min_width_ratio": 0.22,
-    "max_inset_ratio": 0.12
-  },
-  "generation": {
-    "actual_prompt": null,
-    "reference_paths_actually_passed": [],
-    "note": "执行时记录实际提示词及传入文件；本示例未生成"
-  },
-  "qa": {
-    "technical": {
-      "status": "pending",
-      "checks": [
-        "source_hash_unchanged",
-        "true_alpha",
-        "exclusion_pixels_preserved",
-        "margin_and_readable_size"
-      ]
-    },
-    "visual": {
-      "status": "pending",
-      "checks": [
-        "scene_intent",
-        "action_gaze_expression",
-        "reference_design",
-        "outfit_anatomy",
-        "background_and_composition",
-        "face_occlusion_and_visible_features",
-        "background_refinement_benefit_and_texture",
-        "caption_spelling_readability",
-        "decoration_density_and_clearance"
-      ]
-    },
-    "user_acceptance": "pending",
-    "delivery_status": "in_progress"
-  },
-  "decoration": {
-    "enabled": false,
-    "authorization": null,
-    "caption_mode": null,
-    "actual_main_text": null,
-    "actual_secondary_text": null,
-    "elements": [],
-    "zones": [],
-    "note": "用户开启后按当前照片填实际短句、位置及授权；参考口号不是固定模板"
-  }
+  "background_render_style": "photo",
+  "decoration": "clean",
+  "add_text": false,
+  "text": "",
+  "replace_real_person": false,
+  "inputs_reviewed": false,
+  "edit_scope": "visual",
+  "template_note": "Replace relative paths and text with actual reviewed inputs. Inputs are not included in the package. Set inputs_reviewed=true only after viewing every selected image. For private profile references use reference_ids with an explicit --profile; do not package that profile. For a genuinely unresolved style use needed with 2-3 actual displayed candidate options (id/label/description), wait for an explicit answer, then use resolved in a new run. Delegate only when the user asks you to choose; never default to the first option on timeout.",
+  "style_selection": "resolved",
+  "style_options": []
 }

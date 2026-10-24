@@ -1,75 +1,38 @@
-# 技术执行与输出
+# Codex图像执行路径
 
-背景/构图的决策见 [BACKGROUND_COMPOSITION.md](BACKGROUND_COMPOSITION.md)，生成与编辑提示词见 [PROMPTS.md](PROMPTS.md)。本页管来源、坐标、合成与验证。
+每张先写清情境、输入参考分工和本轮修改范围。通用场景判断见SCENARIOS；本文件解决实际如何执行。
 
-## 1. 输入和基准
+## 视觉编辑（标准与三个场景的普通试跑）
 
-按EXIF统一方向；有ICC时转sRGB，记录转换与哈希。原图只读，保存无Q版底图。每位主角编号，按可见证据记录特征、衣服、动作、道具和授权补全；多图各自映射，旧图不作为当前内容原图。
+view_image逐张查看 → spec与plan → 读取imagegen-request.json → 实际内置imagegen → 查看输出 → 写真实视觉记录 → collect。
 
-自然调色先解决曝光/偏色，再克制地建立neutral-cool/neutral/warm-soft。脚本grade是全局基础处理，不识别肤色，强混合光需要局部方案与目视检查；不把重采样放大称为细节恢复。
+这里的图像编辑由内置工具完成。本地helper不自动分割、识别人脸、提取已有小人或调用云端API。输出是完整PNG也可交付，不要为了“分层”制造不存在的base/chibi/decor。源图只读，PNG另存；改动范围与工具实际行为都记录。
 
-## 2. 两种蒙版
+- 标准版检查主角身份、表情、衣服、动作和场景是否视觉对应，不称像素未变。
+- 入景检查落点、前后遮挡、尺度和接触阴影，不机械套贴纸的尺寸下限或边距。
+- 替换仅删指定真人；广告里的人像、其他人和未选对象不随之删除。缺原Q版资产时可按授权新画，明说参照重绘，不能说只平移。
+- 局部修订优先从最新认可图开始。复用资产只移动时用等比合成；工具只能重绘时说明真实范围，不将生成式编辑称无损。
 
-| 用途 | 白/非零含义 | 典型范围 |
-|---|---|---|
-| restore的keep_mask | 255保留原前景，灰值边缘混合，0使用新背景 | 人物全体、发丝、衣服、毛边、关键桌椅/道具 |
-| compose的protect_mask | 非零处禁止贴纸遮挡，0允许叠放 | 原脸、主要手势、道具关键辨识/互动处、必要文字 |
+## 严格原主体保留（当前只为standard提供辅助入口）
 
-两者分别制作，不能互相复制。衣服/下方头发可以属于原前景保留层，同时允许贴纸在成品中适度覆盖。遮挡是否影响情境仍由视觉判断。生成工具的蒙版语义按其文档转换，不能假定同样白色含义。
-
-蒙版与保护框使用EXIF/ICC规范化后输入照片的坐标；灰度L/1，尺寸相同。几何变换后更新坐标。compose内置crop和padding会自动平移框/蒙版；旋转、缩放、前景组移动需在上游正确变换后另交已配准保护区。
-
-## 3. 背景与构图实现边界
-
-先确定scene_intent、完整前景组、目标画幅和落点。背景板单独生成，再恢复原前景。需要缩放/平移时将人物和关联道具一起变换，并检查接触关系。alpha边缘、发丝/毛边、桌椅遮挡、透视、光向与阴影必须实际查看。
-
-本包脚本支持确定性调色、同尺寸蒙版恢复、裁切、白画布留白、右下合成和像素比较；不提供语义抠图、背景生成、自动前景重排或倾斜校正。其他操作需用当前可用的编辑/合成能力，并记录实际变换；不得因为有构图C选项就声称本脚本已实现它。
-
-pixel_lock仅保护与基准配准后的指定像素；调色/缩放会改变像素值。没有可靠蒙版或透视无法匹配时，不输出重画脸的“保脸成品”。
-
-## 4. 脚本示例
-
-依赖安装在独立虚拟环境，或使用已具备Pillow/NumPy的本地运行时。用户指定本Skill分层工作流时，按宿主图像工具规则使用确定性合成；有额外限制时遵循实际限制。
+1. 通过原片只读生成非生成式调光底图。先实际判断曝光、白平衡、肤色与背景层次，按最新授权改善；只套微量全局参数不代表已做局部美化。
+2. spec设standard、edit_scope=strict_subject。helper只编译独立透明Q版请求；collect保存chibi.png，composition_required=true，不能当最终成片。
+3. 实际制作必要蒙版，再用photo_ops.py compose。原主体保留蒙版与贴纸禁遮挡区是两件事：restore保留完整原前景；compose只禁贴纸压住脸、主要手势、关键道具及必要文字。
+4. compose默认在右下局部内移、再缩小。参数只用于corner贴纸路径；它不做任意坐标的场景融合。
+5. 需要保留区域像素校验时用verify-lock对齐同尺寸同坐标基准。它只比较keep-mask=255指定区RGB，不验证蒙版是否圈对或动作语义。
 
 ```bash
-python scripts/photo_ops.py grade --input input/photo.jpg --output work/graded.png --preset neutral-cool --strength 0.35 --exposure 0.1
-python scripts/photo_ops.py restore --reference work/graded.png --edited work/background.png --keep-mask work/foreground_keep.png --output work/base.png
-python scripts/photo_ops.py compose --photo work/base.png --sticker work/chibi.png --protect-mask work/overlay_exclusion.png --width-ratio 0.30 --min-width-ratio 0.22 --output output/final.png
+python3 scripts/photo_ops.py grade --input input.jpg --output base.png --preset neutral-cool --strength 0.35 --exposure 0.1
+python3 scripts/photo_ops.py compose --photo base.png --sticker chibi.png --protect-mask no_overlay.png --output final.png
+python3 scripts/photo_ops.py verify-lock --reference base.png --candidate final.png --keep-mask face_core.png --report pixel_check.json
 ```
 
-compose默认先在右下向内搜索，范围不超过画宽/高12%，在当前可读尺寸找不到位置后才缩小，最小画宽22%。`--max-inset-ratio 0`固定贴右下安全边距；最大允许0.25。无安全位置时失败并解释，不能偷偷关闭保护区或把最小尺寸改到10%。确有小角标要求时才能降低下限。
+数值只是命令示例，不是每图固定滤镜。背景A/B/C和构图专项保留在[BACKGROUND_COMPOSITION.md](BACKGROUND_COMPOSITION.md)，只在实际采用这些旧版分层设置时读取；它不覆盖三场景的新入景规则。
 
-可另用 `--protect-json assets/protect.example.json` 指定矩形，必须换成本图坐标；它与protect-mask取并集。这些都是叠放禁区，不是自动识别人脸。裁切会拒绝删除已标记禁区；未标记的其他人物/道具仍需人工检查，不能把脚本通过等同构图正确。
+## 整体收益与边界
 
-只有已授权白边时使用：
-```bash
-python scripts/photo_ops.py compose --photo work/base.png --sticker work/chibi.png --protect-mask work/overlay_exclusion.png --padding 24 24 140 24 --output output/final-padded.png
-python scripts/photo_ops.py pad --input output/final.png --padding 0 0 120 0 --output output/final-right-margin.png
-python scripts/photo_ops.py verify-lock --reference work/reference.png --candidate work/result.png --keep-mask work/face_core.png --report output/pixel-check.json
-```
+原图→底图（实际有时）→终图同尺寸比较：自然光色、背景主次、构图各写实际收益或保留理由；再查Q版和装饰。不要把Alpha、贴纸没盖脸、文件能解码当整体好看。
 
-padding顺序为左、上、右、下。扩白画布与生成背景延展不同。verify-lock退出码0一致、1有差异、2输入错误；不证明蒙版覆盖了所有脸。
+真人自然修饰仅按授权：局部补光、偏色和暂时油光可适度整理，保留本人结构与纹理。生成式修饰如实记录，不能同时宣称原主体零重绘。未知衣服/身体和不清楚五官分别记未见与获准设计补全。
 
-## 5. 贴纸处理与验收
-
-独立生成足够清晰的贴纸，真Alpha，深浅底查看边缘、白衣/眼白和棋盘格残留。半透明RGB底色显示为灰并不证明Alpha无效，须检查通道；不靠删白色实现透明。无用透明空隙可裁去，不能裁掉手脚/装饰；放大不意味着恢复细节。
-
-合成允许非关键衣服/下方头发适度叠放，保护原脸、主要手势、道具辨识区。单人默认30%画宽，手机整图看清表情与核心互动。脚本布局报告包含尺寸、内移量、宽度下限、保护区像素比较；不验证故事、画风、头身或用户认可。
-
-## 6. 任务记录
-
-默认输出base.png、chibi.png、final.png、job.json、qa.json。修改另存版本，记录参考角色与实际提示词、锁定项/修改项、原片哈希、补全依据、背景模式、前景组、几何变换和贴纸位置。
-
-```json
-{
-  "status": "needs_review",
-  "technical_checks": {"files": "pass", "alpha": "pass", "source_unchanged": "pass"},
-  "visual_checks": {"scene_intent": "pending", "pose_and_props": "pending", "style_and_proportions": "pending", "face_occlusion_and_visible_features": "pending", "background_and_composition": "pending"},
-  "user_acceptance": "pending",
-  "unresolved": []
-}
-```
-
-面部局部遮挡另查：露出的面部是否被错误留空、眼睛是否落在脸的合理位置、是否穿透手机/手；若调整遮挡物，是否仅限已授权Q版设计且仍读得出原动作。这个检查由目视完成，像素测试不判断是否有眼睛。
-
-上例pending必须由实际视觉检查补齐；未检查时总体仍为needs_review。程序通过不能填视觉pass。用户明确拒绝时更新状态和失败原因，技术检查可保留但不能继续标整图通过。
+候选输出等待用户评图；技术、视觉与用户接受分别记录。

@@ -1,19 +1,27 @@
 ---
 name: cool-chibi-photo
-description: 编辑已有照片，按标准版或没拍到我、宠物小物互动、人太小替换三个场景加入同款Q版。用于朋友圈照骗、真人加小人、小人入景、摸猫或靠近小物、原位替换小人物；支持参考画风、背景光色、独立装饰与局部修订。
+description: 编辑已有照片，按标准版或没拍到我、宠物小物互动、人太小替换三个场景加入同款Q版。用于朋友圈照骗、真人加小人、摸猫或小物互动、原位替换小人物；支持Codex内置图像工具，或Claude分析并交接Grok手动出图。
 metadata:
-  version: "3.0.0-rc.1"
+  version: "3.0.0-rc.2"
 ---
 
-# 朋友圈照骗 · Codex 三场景版
+# 朋友圈照骗 · Claude / Codex 三场景版
 
 标准底子保留真人＋右下同款Q版；三个场景处理没人入镜、宠物小物互动、替换小人物。先看实际图片，再按本张情境选择，不让所有照片共用一个右下贴纸模板。
+
+## 先选实际执行方式
+
+- **Codex且当前会话有图像工具**：读取下方“在Codex里执行”，用内置图像工具生成/编辑。
+- **Claude / Claude Code**：按共同规则看图、选场景和确认必要选择，再读[CLAUDE_GROK.md](references/CLAUDE_GROK.md)，交付可复制提示词、实际附件顺序与检查项；用户在Grok出图后回传，Claude再检查。不要因缺少Codex专属工具阻塞分析，也不要声称Claude本身已生图。
+- **其他没有生图工具的宿主**：同样可交付手动交接材料并停在等待外部结果。没有收到新图前，保持`awaiting_external_result`，不伪造成品或生图成功。
+
+Grok在这里是外部图片编辑工具；本包没有自动Grok连接器，不默认使用API、操作账号或上传照片。具体宿主可用工具以实际会话为准。
 
 ## 标准底子：人清楚、想保留
 
 `scenario=standard, placement=corner`。先按授权改善光色、背景和构图，再加对应Q版。背景不能只贴个小人就算美化过：写清本图问题、实际操作、可见收益；没有必要改时说明理由。身份、衣服、动作、主要道具按原片，参考图只贡献指定范围。
 
-普通试跑用 `edit_scope=visual`：内置图像工具可编辑整图，只报告实际视觉保留程度。要求原主体不被生成式重画时，用 `strict_subject` 仅生成透明Q版，再用本地调光底图、保护蒙版和旧合成脚本；不能将整图生成称为严格保脸。详细执行见 [WORKFLOW.md](references/WORKFLOW.md)。
+普通试跑用 `edit_scope=visual`：选用的图像工具编辑整图，只报告实际视觉保留程度。要求原主体不被生成式重画时，用 `strict_subject` 仅生成透明Q版，再用本地调光底图、保护蒙版和旧合成脚本；不能将整图生成称为严格保脸。详细执行见 [WORKFLOW.md](references/WORKFLOW.md)。
 
 ## 场景一：没拍到我
 
@@ -40,6 +48,12 @@ metadata:
 - 发型/表情/身形设计只按本张授权变化；可见五官要自然，手机遮挡不画穿透眼睛。每位主角/宠物数量、手臂和关键道具都逐项核对。
 - 已有明确设置继续生效；只改某一层时冻结满意项。多个相似输入仍逐张映射，不拿旧图或重复图充数。
 
+## 在 Claude 里执行
+
+先实际查看附件，沿用相同场景、参考分工和风格选择规则；待风格与必要删人许可明确后，按[CLAUDE_GROK.md](references/CLAUDE_GROK.md)给出一份完整单图提示词、图1/2/3对应的真实附件清单及回传要求。Claude网页/桌面模式不要求本地Python。没有脚本环境就用文字完成分析与检查；不虚构路径或调用Codex的`view_image`/`imagegen`。
+
+不要把`codex_job.py`生成的工具JSON当作Grok接口。本轮Claude路线默认手动交接，图像出图、用户传回、Claude实际目视都完成后才分别记录；软件与安装检查不代表Claude＋Grok实图链路已验证。
+
 ## 在 Codex 里执行
 
 当前会话需有 `view_image` 与内置 `imagegen`。本地helper不调用收费API，不负责视觉判断，也不能单独从终端生成图像。工具接口以当前会话实际说明为准。
@@ -63,8 +77,8 @@ metadata:
    只有真正拿到的图层才保存；没有base/chibi/decor就明说，不制造空文件。strict路径只得到透明资产时，还需本地合成与保护区核验。
 5. 每原片一目录，原片仅链接并哈希；版本另存。技术检查、Agent目视、Lulu接受分开；成品状态`ready_for_user_review`、`user_acceptance=pending`。同一缺陷两次针对性修正仍不合格时说明问题，保留版本，不无限换画风。
 
-安装、依赖、自检和能力边界见 [CODEX_SETUP.md](references/CODEX_SETUP.md)；提示词示例见 [PROMPTS.md](references/PROMPTS.md)。
+Codex安装、依赖、自检见[CODEX_SETUP.md](references/CODEX_SETUP.md)；Claude安装与Grok交接见[CLAUDE_GROK.md](references/CLAUDE_GROK.md)；共用提示词见[PROMPTS.md](references/PROMPTS.md)。
 
 ## 版本与范围
 
-3.0.0-rc.1：三场景Codex路由、实际请求编译与归档、私有参考索引支持；保留2.2.0非生成式工具和旧回归。它是试跑候选，实图覆盖以随包 [VALIDATION.md](VALIDATION.md) 为准，不能把未跑场景写成通过。原片只读，私人照片、人物库和运行记录不进分发包。
+3.0.0-rc.2：补充Claude / Claude Code安装与Grok手动交接路由；保留rc.1的三场景Codex工具链、条件风格选择、非生成式工具与软件回归。实图覆盖以[VALIDATION.md](VALIDATION.md)为准，Claude＋Grok尚未端到端实图验证。原片只读，私人照片、人物库和运行记录不进分发包。

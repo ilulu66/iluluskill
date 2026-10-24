@@ -1,6 +1,6 @@
 {
   "example_only": true,
-  "skill_version": "3.0.0-rc.1",
+  "skill_version": "3.0.0-rc.2",
   "source_photo": "input/source.jpg",
   "output_dir": "runs/example-001",
   "scenario": "standard",

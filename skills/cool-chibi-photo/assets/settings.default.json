@@ -1,5 +1,5 @@
 {
-  "skill_version": "3.0.0-rc.1",
+  "skill_version": "3.0.0-rc.2",
   "schema_status": "policy_defaults_not_a_job",
   "note": "Reference policy; codex_job.py does not automatically load this file. Build each job from job.example.json after reviewing the actual inputs.",
   "scenario": "standard",

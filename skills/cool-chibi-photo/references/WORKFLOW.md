@@ -1,6 +1,8 @@
-# Codex图像执行路径
+# 图像执行路径
 
 每张先写清情境、输入参考分工和本轮修改范围。通用场景判断见SCENARIOS；本文件解决实际如何执行。
+
+**Claude / Claude Code**先走[CLAUDE_GROK.md](CLAUDE_GROK.md)的手动交接：Claude分析与编写提示词→用户上传原照/选中参考到Grok生成/编辑→回传Claude实际检查。以下helper、内置imagegen与严格主体合成是Codex执行路径，不是Claude默认必经步骤，也不表示已自动连上Grok。
 
 ## 视觉编辑（标准与三个场景的普通试跑）
 

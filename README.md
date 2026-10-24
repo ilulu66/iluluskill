@@ -6,7 +6,7 @@
 > - **lulu-consult 咨询流水线**——把一次专业对话,变成客户当天收到的报告 + 一颗进你自己库的经验原子。
 > - **cool-chibi-photo 朋友圈照骗**——标准版保留真人＋同款Q版，新增没拍到我、宠物小物互动、人太小替换三个场景。
 
-**状态：v0.5.0-rc.1 试用版（2026-10-25），共8个Skill。** 照片组件升级至cool-chibi-photo 3.0.0-rc.1，优先适配Codex；学习与咨询组件本轮未改。下载[三场景试用版ZIP](https://github.com/ilulu66/iluluskill/releases/tag/v0.5.0-rc.1)。
+**状态：v0.5.0-rc.2 试用版（2026-10-25），共8个Skill。** 照片组件升级至cool-chibi-photo 3.0.0-rc.2，补齐Claude / Codex安装和Grok手动出图流程；学习与咨询组件本轮未改。下载[三场景试用版ZIP](https://github.com/ilulu66/iluluskill/releases/tag/v0.5.0-rc.2)。
 
 ## 命名三层
 
@@ -81,12 +81,14 @@ iluluskill / 会客厅skill      ← 总箱(本仓库,一条命令装全家)
 
 画风确实拿不准时，先展示2～3个真实参考，再用宿主支持的选择界面让你选；没有原生选择工具就用文字。已指定、已认可或明确委托决定时继续执行，不重复询问。选择画风不会顺带改变衣服、背景或删人许可。
 
-**适用环境**：当前优先适配能看图、能调用内置图像生成/编辑工具的Codex会话。路由helper与安装器需Python 3.10+；旧本地合成脚本另需Pillow和NumPy。安装Skill不会附带生图模型、额度或API服务。用自己的原照与参考即可，公开包不含作者私人图库。
+**执行方式**：Codex会话具备看图与内置图像工具时可直接生成/编辑；Claude / Claude Code负责分析和完整提示词，用户手动把原照与选中参考上传Grok出图，再回传Claude检查。本包没有Grok自动连接器，不把安装成功写成自动生图。[Claude能力说明](https://support.claude.com/en/articles/9002504-can-claude-produce-images)、[Grok图片编辑说明](https://x.ai/grok/use-cases/image-editing)。
 
-**验证范围**：67项软件回归通过；小物互动已取得一张用户认可结果。无人景物尚未完成真实原片生图回归，小人物替换的比例仍待修订；本版标记为试用版，不承诺三场景均稳定通过。整图生成与严格主体保留分开，后者需要实际蒙版、合成和像素核验。
+**依赖**：npx安装需Node.js/npm；Codex本地路由helper与安装器需Python 3.10+，旧本地合成另需Pillow和NumPy。Claude网页ZIP安装/文字交接不要求本地Python。安装Skill不附带模型、额度或API服务；公开包不含作者私人图库。
+
+**验证范围**：67项软件回归通过；小物互动已取得一张用户认可结果。无人景物尚未完成真实原片生图回归，小人物替换的比例仍待修订；本版标记为试用版，Claude＋Grok实图链路尚未端到端验证，不承诺三场景均稳定通过。整图生成与严格主体保留分开，后者需要实际蒙版、合成和像素核验。
 
 - [照片组件完整说明与安装](skills/cool-chibi-photo/README.md)
-- [Codex首次运行](skills/cool-chibi-photo/references/CODEX_SETUP.md) · [场景路由](skills/cool-chibi-photo/references/SCENARIOS.md)
+- [Codex首次运行](skills/cool-chibi-photo/references/CODEX_SETUP.md) · [Claude安装与Grok交接](skills/cool-chibi-photo/references/CLAUDE_GROK.md) · [场景路由](skills/cool-chibi-photo/references/SCENARIOS.md)
 - [实际验证范围](skills/cool-chibi-photo/VALIDATION.md)
 
 ## 仓库结构
@@ -138,7 +140,17 @@ npx -y skills add ilulu66/iluluskill -g --all
 npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo --agent codex -y
 ```
 
-已有`~/.codex/skills/cool-chibi-photo`时，下载上述ZIP后在组件目录运行`python3 scripts/install.py --codex --replace`，先备份再原位更新，避免留下另一种方式安装的同名副本。安装后开新的Codex对话，附原照和自己的参考即可。详细位置与依赖见[安装说明](skills/cool-chibi-photo/references/CODEX_SETUP.md)。
+只把照片工具安装到Claude Code（终端）：
+
+```bash
+npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo --agent claude-code -y
+```
+
+Claude网页/桌面版使用ZIP：从上述Release下载完整Skill ZIP，进入Claude的`Customize → Skills`，选择创建/上传Skill并启用；需开启代码执行/文件创建，入口以实际界面为准。这不是在网页里运行npx。[官方Skills说明](https://support.claude.com/en/articles/12512180-use-skills-in-claude)。
+
+安装后开新对话，附原照与自己的参考。Claude可先说“用照骗skill分析这张图，给我可以发到Grok的完整提示词和附件清单”；用户在Grok出图后回传检查，未出图前不称已完成。
+
+已经手动安装过同名Skill的，先定位并备份旧目录，避免不同安装方式留下重复入口。Codex的ZIP更新可运行`python3 scripts/install.py --codex --replace`；该Python安装器没有Claude参数。详细见[Codex安装](skills/cool-chibi-photo/references/CODEX_SETUP.md)与[Claude / Grok步骤](skills/cool-chibi-photo/references/CLAUDE_GROK.md)。
 
 | 你想做什么 | 装好后怎么说 |
 |---|---|

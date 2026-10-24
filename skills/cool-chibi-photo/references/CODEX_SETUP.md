@@ -1,4 +1,4 @@
-# Codex安装与首次运行 · 3.0.0-rc.1
+# Codex安装与首次运行 · 3.0.0-rc.2
 
 ## 使用环境
 
@@ -10,7 +10,7 @@ Skill是给Codex读的路由、提示词和本地helper。Codex当前会话需�
 npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo --agent codex -y
 ```
 
-也可从[试用版Release](https://github.com/ilulu66/iluluskill/releases/tag/v0.5.0-rc.1)下载ZIP。解压整个cool-chibi-photo目录，不仅复制SKILL.md。已有同名活动版时先定位和备份，在同一目录更新，避免多个版本竞争发现。尤其已有~/.codex/skills版本时，采用下方ZIP安装器原位更新；两种方式择一。
+也可从[试用版Release](https://github.com/ilulu66/iluluskill/releases/tag/v0.5.0-rc.2)下载ZIP。解压整个cool-chibi-photo目录，不仅复制SKILL.md。已有同名活动版时先定位和备份，在同一目录更新，避免多个版本竞争发现。尤其已有~/.codex/skills版本时，采用下方ZIP安装器原位更新；两种方式择一。
 
 ```bash
 # 在解压目录运行；明确选择Codex位置

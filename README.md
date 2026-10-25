@@ -6,7 +6,7 @@
 > - **lulu-consult 咨询流水线**——把一次专业对话,变成客户当天收到的报告 + 一颗进你自己库的经验原子。
 > - **cool-chibi-photo 朋友圈照骗**——标准版保留真人＋同款Q版，新增没拍到我、宠物小物互动、人太小替换三个场景。
 
-**状态：v0.5.0-rc.2 试用版（2026-10-25），共8个Skill。** 照片组件升级至cool-chibi-photo 3.0.0-rc.2，补齐Claude / Codex安装和Grok手动出图流程；学习与咨询组件本轮未改。下载[三场景试用版ZIP](https://github.com/ilulu66/iluluskill/releases/tag/v0.5.0-rc.2)。
+**状态：v0.5.0-rc.3 试用版（2026-10-25），共8个Skill。** 照片组件升级至cool-chibi-photo 3.0.0-rc.3，内置Lulu Q版画风参考；默认自动适配，明确场景版才弹三选一；学习与咨询组件本轮未改。下载[三场景试用版ZIP](https://github.com/ilulu66/iluluskill/releases/tag/v0.5.0-rc.3)。
 
 ## 命名三层
 
@@ -71,7 +71,11 @@ iluluskill / 会客厅skill      ← 总箱(本仓库,一条命令装全家)
 
 ## cool-chibi-photo · 朋友圈照骗三场景版
 
-给一张已有照片和自己的角色/画风参考，让Q版进入这张照片的具体情境。标准版仍可保留真人、在右下加同款小人；三种新场景按照片内容选择：
+装好后上传原照，说“帮我用这个iluluskill P图”即可。未写模式或写“标准版”都按实际照片自动适配，不弹场景菜单；明确写“场景版”才让用户三选一：没拍到我／宠物小物互动／人太小替换。未答复不代选，已有选择不反复问；自动适配不默认删除真人。
+
+默认画风参考已随包提供，Agent会实际查看并使用这张[明确授权的Lulu Q版画风图](skills/cool-chibi-photo/assets/lulu-q-style.png)。只借二维画法、线条阴影与短身比例，不复制Lulu身份或黑衣/长发/闭眼笑/坐姿。读者不用再找画风图，人物按自己的原照；没拍到本人却明确要加入本人时只补一张身份照。自选画风或参考仍优先，详见[默认规范](skills/cool-chibi-photo/references/DEFAULT_STYLE.md)。
+
+给一张已有照片（自己的角色/画风参考可选），让Q版进入这张照片的具体情境。标准版仍可保留真人、在右下加同款小人；三种新场景按照片内容选择：
 
 | 照片情况 | 处理方式 |
 |---|---|
@@ -83,9 +87,9 @@ iluluskill / 会客厅skill      ← 总箱(本仓库,一条命令装全家)
 
 **执行方式**：Codex会话具备看图与内置图像工具时可直接生成/编辑；Claude / Claude Code负责分析和完整提示词，用户手动把原照与选中参考上传Grok出图，再回传Claude检查。本包没有Grok自动连接器，不把安装成功写成自动生图。[Claude能力说明](https://support.claude.com/en/articles/9002504-can-claude-produce-images)、[Grok图片编辑说明](https://x.ai/grok/use-cases/image-editing)。
 
-**依赖**：npx安装需Node.js/npm；Codex本地路由helper与安装器需Python 3.10+，旧本地合成另需Pillow和NumPy。Claude网页ZIP安装/文字交接不要求本地Python。安装Skill不附带模型、额度或API服务；公开包不含作者私人图库。
+**依赖**：npx安装需Node.js/npm；Codex本地路由helper与安装器需Python 3.10+，旧本地合成另需Pillow和NumPy。Claude网页ZIP安装/文字交接不要求本地Python。安装Skill不附带模型、额度或API服务；公开包不含作者私人实拍/人物库，仅额外包含上述已授权的Q版风格参考。
 
-**验证范围**：67项软件回归通过；小物互动已取得一张用户认可结果。无人景物尚未完成真实原片生图回归，小人物替换的比例仍待修订；本版标记为试用版，Claude＋Grok实图链路尚未端到端验证，不承诺三场景均稳定通过。整图生成与严格主体保留分开，后者需要实际蒙版、合成和像素核验。
+**验证范围**：软件回归覆盖原工具及本轮默认参考/场景等待门控，实际结果见本次Release；小物互动已取得一张用户认可结果。无人景物尚未完成真实原片生图回归，小人物替换的比例仍待修订；本版标记为试用版，Claude＋Grok实图链路尚未端到端验证，不承诺三场景均稳定通过。整图生成与严格主体保留分开，后者需要实际蒙版、合成和像素核验。
 
 - [照片组件完整说明与安装](skills/cool-chibi-photo/README.md)
 - [Codex首次运行](skills/cool-chibi-photo/references/CODEX_SETUP.md) · [Claude安装与Grok交接](skills/cool-chibi-photo/references/CLAUDE_GROK.md) · [场景路由](skills/cool-chibi-photo/references/SCENARIOS.md)
@@ -148,7 +152,7 @@ npx -y skills add ilulu66/iluluskill -g --skill cool-chibi-photo --agent claude-
 
 Claude网页/桌面版使用ZIP：从上述Release下载完整Skill ZIP，进入Claude的`Customize → Skills`，选择创建/上传Skill并启用；需开启代码执行/文件创建，入口以实际界面为准。这不是在网页里运行npx。[官方Skills说明](https://support.claude.com/en/articles/12512180-use-skills-in-claude)。
 
-安装后开新对话，附原照与自己的参考。Claude可先说“用照骗skill分析这张图，给我可以发到Grok的完整提示词和附件清单”；用户在Grok出图后回传检查，未出图前不称已完成。
+安装后开新对话，附原照即可，自己的角色或画风参考可选。Claude可先说“用照骗skill分析这张图，给我可以发到Grok的完整提示词和附件清单”；用户在Grok出图后回传检查，未出图前不称已完成。
 
 已经手动安装过同名Skill的，先定位并备份旧目录，避免不同安装方式留下重复入口。Codex的ZIP更新可运行`python3 scripts/install.py --codex --replace`；该Python安装器没有Claude参数。详细见[Codex安装](skills/cool-chibi-photo/references/CODEX_SETUP.md)与[Claude / Grok步骤](skills/cool-chibi-photo/references/CLAUDE_GROK.md)。
 
@@ -156,7 +160,7 @@ Claude网页/桌面版使用ZIP：从上述Release下载完整Skill ZIP，进入
 |---|---|
 | 整理讲座 | “讲座整理”，或提供会议录制分享链接 |
 | 咨询准备/复盘 | 先填写咨询配置，再调用 lulu-consult |
-| 照片三场景＋Q版 | 附原照与参考，说“用 $cool-chibi-photo，让小人坐在玩偶旁边，保留真实玩偶，不加文字” |
+| 照片三场景＋Q版 | 附原照，说“帮我用这个iluluskill P图”；明确写“场景版”才三选一 |
 
 ## Roadmap
 

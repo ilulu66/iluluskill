@@ -1,5 +1,7 @@
 # 图像执行路径
 
+当前默认图见[DEFAULT_STYLE.md](DEFAULT_STYLE.md)。不写模式/标准版均按图直接适配；只有明确场景版先三选一，scene_choice_needed不发图像请求。所有本次传入图包含内置图，都必须实际看过；身份与删人许可分别处理。
+
 每张先写清情境、输入参考分工和本轮修改范围。通用场景判断见SCENARIOS；本文件解决实际如何执行。
 
 **Claude / Claude Code**先走[CLAUDE_GROK.md](CLAUDE_GROK.md)的手动交接：Claude分析与编写提示词→用户上传原照/选中参考到Grok生成/编辑→回传Claude实际检查。以下helper、内置imagegen与严格主体合成是Codex执行路径，不是Claude默认必经步骤，也不表示已自动连上Grok。

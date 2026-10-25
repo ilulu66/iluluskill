@@ -13,6 +13,7 @@ import re
 ROOT = Path(__file__).resolve().parents[1] / "skills" / "cool-chibi-photo"
 EXCLUDED = {"__pycache__", ".venv", "venv", ".git", "input", "output", "work", "runs", "tmp"}
 TEXT_SUFFIXES = {".md", ".txt", ".json", ".yaml", ".py"}
+PUBLIC_IMAGE_ASSETS = {"assets/lulu-q-style.png"}
 
 
 def distribution_files():
@@ -23,7 +24,7 @@ def distribution_files():
             path = Path(directory) / name
             if name in {"SHA256SUMS.txt", ".DS_Store", "00-协作台账.md"} or name.endswith(".pyc") or name.startswith(".env"):
                 continue
-            if path.is_symlink() or path.suffix not in TEXT_SUFFIXES:
+            if path.is_symlink() or (path.suffix not in TEXT_SUFFIXES and path.relative_to(ROOT).as_posix() not in PUBLIC_IMAGE_ASSETS):
                 raise ValueError(f"Unexpected distributed asset: {path.relative_to(ROOT)}")
             result.append(path)
     return sorted(result)
@@ -31,10 +32,20 @@ def distribution_files():
 
 def validate(write_manifest=False):
     files = distribution_files()
-    for required in ["SKILL.md", "README.md", "LICENSE.md", "VALIDATION.md", "scripts/photo_ops.py", "scripts/install.py", "tests/test_photo_ops.py"]:
+    for required in ["SKILL.md", "README.md", "LICENSE.md", "VALIDATION.md", "scripts/photo_ops.py", "scripts/install.py", "tests/test_photo_ops.py", "scripts/codex_job.py", "assets/default-style.json", "assets/lulu-q-style.png", "assets/STYLE-REFERENCE-LICENSE.md", "references/DEFAULT_STYLE.md"]:
         if ROOT / required not in files:
             raise ValueError(f"Missing {required}")
     for path in files:
+        if path.relative_to(ROOT).as_posix() in PUBLIC_IMAGE_ASSETS:
+            from PIL import Image
+            with Image.open(path) as asset:
+                if asset.format != "PNG" or "A" not in asset.getbands():
+                    raise ValueError("Bundled style reference must be a transparent PNG")
+                asset.load()
+                low, high = asset.getchannel("A").getextrema()
+                if low == high or low != 0 or high != 255:
+                    raise ValueError("Bundled style reference needs actual transparent and opaque pixels")
+            continue
         content = path.read_text(encoding="utf-8")
         if re.search(r"/(?:Users|home)/[^\s\"']+", content):
             raise ValueError(f"Personal absolute path in {path.relative_to(ROOT)}")
@@ -55,6 +66,11 @@ def validate(write_manifest=False):
     settings = json.loads((ROOT / "assets/settings.default.json").read_text())
     if version is None or version[1] != settings["skill_version"]:
         raise ValueError("Version mismatch")
+    style = json.loads((ROOT / "assets/default-style.json").read_text())
+    if style.get("image") != "lulu-q-style.png" or style.get("scope") != "style_only":
+        raise ValueError("Unexpected bundled image or identity scope")
+    if hashlib.sha256((ROOT / "assets/lulu-q-style.png").read_bytes()).hexdigest() != style.get("sha256"):
+        raise ValueError("Bundled image metadata hash mismatch")
     spec = importlib.util.spec_from_file_location("photo_ops", ROOT / "scripts/photo_ops.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

@@ -23,6 +23,16 @@ import zlib
 SCENARIOS = {"standard", "no_person", "pet_object", "small_person"}
 REFERENCE_ROLES = {"identity", "style", "layout", "overall"}
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+BUILTIN_ASSETS_DIR = Path(__file__).resolve().parents[1] / "assets"
+DEFAULT_CHIBI_STYLE = (
+    "通用默认画风：圆润、可爱细腻的二维彩色Q版，线条干净统一，柔和体积阴影，适度大头、短躯干短四肢。"
+    "新设计且没有特定认可资产时，以约两头身为起点：头高（头顶至下巴）:自然展开身体高（下巴至脚底）约1:1。"
+    "坐姿弯曲、长发、透视和家具外框不作为身体比例量尺，这只是设计起点，仍需目视检查。"
+)
+BUILTIN_STYLE_SCOPE = (
+    "只借内置图的画法、线条、柔和阴影与短身比例；不借Lulu的身份、发型、肤色、服装、动作、表情、人数或文字。"
+    "当前主角识别特征、衣服与动作来自本张原片或用户明确说明，不能把别人画成Lulu。"
+)
 
 
 def digest(path: Path) -> str:
@@ -73,6 +83,30 @@ def text_field(config: dict[str, Any], name: str, *, required: bool = False) -> 
 
 def file_record(path: Path, **extra: Any) -> dict[str, Any]:
     return {"path": str(path), "sha256": digest(path), **extra}
+
+
+def load_builtin_style() -> dict[str, Any]:
+    """Load the one distributed style asset, never a private identity/profile."""
+    assets = BUILTIN_ASSETS_DIR.resolve()
+    metadata_path = (assets / "default-style.json").resolve()
+    if not metadata_path.is_relative_to(assets) or not metadata_path.is_file():
+        raise ValueError("Built-in style metadata missing or outside assets: default-style.json")
+    metadata = read_object(metadata_path)
+    image_name = text_field(metadata, "image", required=True)
+    if Path(image_name).is_absolute():
+        raise ValueError("Built-in style image must use a relative path inside assets.")
+    image = (assets / image_name).resolve()
+    if not image.is_relative_to(assets) or not image.is_file():
+        raise ValueError("Built-in style image missing or outside assets.")
+    expected = text_field(metadata, "sha256", required=True).lower()
+    if len(expected) != 64 or any(char not in "0123456789abcdef" for char in expected) or digest(image) != expected:
+        raise ValueError("Built-in style image SHA-256 mismatch or invalid metadata hash.")
+    inspect_png(image)
+    return file_record(
+        image, id=text_field(metadata, "id", required=True), role="style", origin="builtin_default",
+        use_for=BUILTIN_STYLE_SCOPE + " 本次画风范围：" + text_field(metadata, "use_for", required=True),
+        default_instructions=text_field(metadata, "default_instructions", required=True),
+    )
 
 
 def style_choices(value: Any, *, required: bool) -> list[dict[str, str]]:
@@ -148,12 +182,22 @@ def compile_prompt(options: dict[str, Any], source: Path,
             "layout": "只用于布局、视觉占比、装饰密度，不代表换人、换景或复制文字的授权",
             "overall": "只用于下述明确认可的整体效果，不自动迁入其人物、关系、地点、衣服或文字",
         }[reference["role"]]
+        if reference.get("origin") == "builtin_default":
+            meaning = "内置纯角色画风参考，只借画法、线条、阴影和短身比例，不是本次主角身份来源"
         parts.append(f"图{index}参考角色={reference['role']}：{meaning}；本次认可范围：{reference['use_for']}。")
+    if options["style_instructions"]:
+        parts.append("本次明确画风要求：" + options["style_instructions"] + "。以此要求为准，不混入内置默认画风；其他参考只贡献与本次要求不冲突的已选范围。")
+    elif options["style_source"] == "explicit_reference":
+        parts.append("角色画风只按本次明确选中的style参考及use_for执行，不叠加通用默认的二维画法或头身目标。")
+    else:
+        parts.append(DEFAULT_CHIBI_STYLE)
+        for reference in references:
+            if reference.get("origin") == "builtin_default":
+                parts.append("内置画风补充：" + reference["default_instructions"])
     parts += [
         "优先执行subject_details明确的新增、复用与修改清单：原图已有本次选定Q版角色且只要求修改时，复用并只改指定部分，不另添一份；只有用户要求且原图没有该角色时才新增。",
         "按当前原照逐个对应主角、衣服和动作，不固定成双人、某套衣服或同一种手势；保留关键互动道具与接触关系。",
-        "明确认可的角色资产或比例参考优先；新设计且没有特定认可资产时，以约两头身为起点：头高（头顶至下巴）:自然展开身体高（下巴至脚底）约1:1。坐姿弯曲、长发、透视和家具外框不作为身体比例量尺，这只是设计起点，仍需目视检查。",
-        "沿用已选画风的短躯干、短四肢，不为填满原真人身高、适配家具或全身展示拉长已选短身角色；调整角色整体尺度使其合理入景。可见五官保留，遮挡部位不画穿透物体的眼睛。",
+        "明确认可的角色资产或比例参考优先，沿用已选角色的体形和内部比例；不为填满原真人身高、适配家具或全身展示拉长已选短身角色，调整角色整体尺度使其合理入景。可见五官保留，遮挡部位不画穿透物体的眼睛，仍需目视检查。",
     ]
     if strict:
         parts += [
@@ -223,8 +267,18 @@ def plan(config_path: Path, profile_path: Path | None = None) -> dict[str, Any]:
         raise ValueError(f"output_dir must be new or empty; never overwrite an existing output: {output}")
     profile_path = profile_path.expanduser().resolve() if profile_path else None
     references = resolve_references(config, config_path.parent, profile_path)
+    entry_mode = choice(config, "entry_mode", "auto", {"auto", "standard", "scene"})
+    scene_choice = choice(config, "scene_choice", "", {"", "no_person", "pet_object", "small_person"})
+    if entry_mode != "scene" and scene_choice:
+        raise ValueError("scene_choice is only applicable when entry_mode=scene.")
     scenario = choice(config, "scenario", "standard", SCENARIOS)
+    # The Agent reviews images; the helper only follows its config or an explicit answer.
+    if scene_choice:
+        scenario = scene_choice
+    scene_pending = entry_mode == "scene" and not scene_choice
     options = {
+        "entry_mode": entry_mode,
+        "scene_choice": scene_choice,
         "scenario": scenario,
         "placement": choice(config, "placement", "in_scene" if scenario in {"pet_object", "small_person"} else "corner", {"corner", "in_scene"}),
         "scene_intent": text_field(config, "scene_intent", required=True),
@@ -237,9 +291,11 @@ def plan(config_path: Path, profile_path: Path | None = None) -> dict[str, Any]:
         "inputs_reviewed": flag(config, "inputs_reviewed"),
         "edit_scope": choice(config, "edit_scope", "visual", {"visual", "strict_subject"}),
         "style_selection": choice(config, "style_selection", "resolved", {"resolved", "needed", "delegate"}),
+        "use_builtin_style": flag(config, "use_builtin_style", True),
+        "style_instructions": text_field(config, "style_instructions"),
     }
     options["style_options"] = style_choices(config.get("style_options", []),
-                                              required=options["style_selection"] == "needed")
+                                              required=options["style_selection"] == "needed" and not scene_pending)
     if options["replace_real_person"] and scenario != "small_person":
         raise ValueError("replace_real_person=true is only supported by the explicitly approved small_person route.")
     if options["edit_scope"] == "strict_subject" and scenario != "standard":
@@ -248,9 +304,28 @@ def plan(config_path: Path, profile_path: Path | None = None) -> dict[str, Any]:
         raise ValueError("text requires add_text=true; remove text or explicitly enable it.")
     if scenario == "small_person" and options["placement"] != "in_scene":
         raise ValueError("small_person replacement needs placement=in_scene to replace the source person in context.")
+    if options["style_instructions"]:
+        options["style_source"] = "explicit_text"
+    elif any(reference["role"] == "style" for reference in references):
+        options["style_source"] = "explicit_reference"
+    elif options["use_builtin_style"]:
+        references.append(load_builtin_style())
+        options["style_source"] = "builtin_reference"
+    else:
+        options["style_source"] = "text_default"
     status = "planned"
     next_action = "Call Codex builtin imagegen with imagegen-request.json, then collect its new PNG."
-    if scenario == "small_person" and not options["replace_real_person"]:
+    if scene_pending:
+        status = "scene_choice_needed"
+        next_action = (
+            "The user explicitly requested scene mode. Ask the three options in scene-picker.json using "
+            "a currently available native selection tool, or ordinary text if none is available. Wait for "
+            "an explicit answer; never pick the first option or proceed on timeout. Create a new plan "
+            "with entry_mode=scene, the answered scene_choice and a new output_dir. The explicit choice "
+            "overrides scenario but never sets replace_real_person; record replacement permission "
+            "explicitly only after the user has authorized the identified target."
+        )
+    elif scenario == "small_person" and not options["replace_real_person"]:
         status = "recommendation_needed"
         next_action = "Recommend keeping the small real person or request explicit replacement permission; no executable request exists."
     elif not options["inputs_reviewed"]:
@@ -279,8 +354,10 @@ def plan(config_path: Path, profile_path: Path | None = None) -> dict[str, Any]:
         "created_at_ns": time.time_ns(),
         "source": source_record,
         "references": references,
+        "style_source": options["style_source"],
         "options": options,
         "status": status,
+        "scene_picker_path": str(output / "scene-picker.json") if status == "scene_choice_needed" else None,
         "style_picker_path": str(output / "style-picker.json") if status == "style_choice_needed" else None,
         "user_acceptance": "pending",
         "generation": {"state": "not_run", "request_path": str(output / "imagegen-request.json") if status == "planned" else None},
@@ -300,9 +377,20 @@ def plan(config_path: Path, profile_path: Path | None = None) -> dict[str, Any]:
                         for entry in options["style_options"]],
         }]}
         write_new(output / "style-picker.json", picker)
+    elif status == "scene_choice_needed":
+        picker = {"questions": [{
+            "title": "这张图想用哪种场景版？请选择一项；选画风与删人许可会分别处理。",
+            "options": [
+                "没拍到我：把指定Q版加入风景或合适的场景位置",
+                "宠物小物互动：保留真实宠物或物件，让Q版与它互动",
+                "人太小替换：将指定小真人换成Q版，先明确替换目标与授权",
+            ],
+        }]}
+        write_new(output / "scene-picker.json", picker)
     write_new(output / "job.json", job)
     return {"job": str(output / "job.json"), "status": status, "next_action": next_action,
-            "request": job["generation"]["request_path"], "style_picker": job["style_picker_path"]}
+            "request": job["generation"]["request_path"], "style_picker": job["style_picker_path"],
+            "scene_picker": job["scene_picker_path"]}
 
 
 def inspect_png(path: Path) -> dict[str, Any]:

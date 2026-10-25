@@ -1,4 +1,4 @@
-# Claude分析，Grok手动出图 · 3.0.0-rc.2
+# Claude分析，Grok手动出图 · 3.0.0-rc.3
 
 Claude负责看图、选路由、整理完整单图提示词和回传检查；用户自己在Grok上传图片、生成并下载。Claude本身不直接生成照片或插画；这里没有Grok API/MCP自动接入，不调用收费API，也不自动上传私人图片。[Claude官方能力说明](https://support.claude.com/en/articles/9002504-can-claude-produce-images)
 
@@ -17,6 +17,12 @@ Claude负责看图、选路由、整理完整单图提示词和回传检查；�
 上传ZIP并启用，再在对话中提供原照及实际选中参考。入口名称以当前实际界面为准；这条流程不用本地Python。[Claude官方Skills说明](https://support.claude.com/en/articles/12512180-use-skills-in-claude)
 
 Claude Code也可以只输出纯文本交接，不必运行codex_job.py。该helper的imagegen-request与next_action为Codex内置工具路径，不是Grok API参数，不能直接交给Grok执行。
+
+## 默认参考与入口
+
+说“帮我用这个iluluskill P图”或标准版时，直接按实际图片适配；明确场景版才先三选一“没拍到我／宠物小物互动／人太小替换”，等答复再编译交接，不把默认用法变成必问菜单。
+
+默认画风已随包提供：[lulu-q-style.png](../assets/lulu-q-style.png)。Claude实际查看这张图，默认把它列为Grok需要上传的画风附件，只借画法/线条/阴影/比例，不借Lulu身份、黑衣、长发、闭眼笑或坐姿。用户自己的明确画风优先；只给原照也可用默认，缺本人身份时只补必要本人资料。详细规则与[默认图下载入口](DEFAULT_STYLE.md)同页；仅贴本地路径不算交付了实际附件。
 
 ## 2. Claude先把这一张说清楚
 

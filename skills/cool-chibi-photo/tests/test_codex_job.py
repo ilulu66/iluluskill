@@ -11,6 +11,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 import zlib
 
 
@@ -45,6 +46,18 @@ class CodexJobTests(unittest.TestCase):
                        "scenario": "standard", "scene_intent": "人在桌前工作，另一只手比耶。",
                        "subject_details": "只按当前原片的可见衣服和动作，不设计固定服装。",
                        "inputs_reviewed": True, "references": []}
+        self.assets = self.base / "package-assets"
+        self.assets.mkdir()
+        self.builtin_image = self.assets / "lulu-q-style.png"
+        make_png(self.builtin_image, width=12, height=9)
+        self.metadata = {"id": "lulu-q-style-v1", "image": "lulu-q-style.png",
+                         "sha256": ops.digest(self.builtin_image), "use_for": "只参考圆润短身的绘画语言",
+                         "default_instructions": "保持清楚柔和的角色绘制，不迁入参考人物身份。"}
+        self.metadata_path = self.assets / "default-style.json"
+        self.metadata_path.write_text(json.dumps(self.metadata, ensure_ascii=False), encoding="utf-8")
+        patcher = mock.patch.object(ops, "BUILTIN_ASSETS_DIR", self.assets)
+        patcher.start()
+        self.addCleanup(patcher.stop)
 
     def planning(self, **changes):
         config = {**self.config, **changes}
@@ -67,9 +80,11 @@ class CodexJobTests(unittest.TestCase):
         request, job = self.read("imagegen-request.json"), self.read("job.json")
         self.assertEqual(set(request), {"prompt", "referenced_image_paths", "transparent_background"})
         self.assertEqual(report["status"], "planned")
-        self.assertEqual(request["referenced_image_paths"], [str(self.source.resolve())])
+        self.assertEqual(request["referenced_image_paths"], [str(self.source.resolve()), str(self.builtin_image)])
         self.assertFalse(request["transparent_background"])
         self.assertEqual(job["options"]["placement"], "corner")
+        self.assertEqual(job["options"]["entry_mode"], "auto")
+        self.assertEqual(job["options"]["scene_choice"], "")
         self.assertEqual(job["options"]["background_render_style"], "photo")
         self.assertEqual(job["options"]["decoration"], "clean")
         self.assertFalse(job["options"]["add_text"])
@@ -77,6 +92,229 @@ class CodexJobTests(unittest.TestCase):
         self.assertIn("不固定成双人", request["prompt"])
         self.assertIn("不声称像素锁定", request["prompt"])
         self.assertEqual((self.output / "prompt.txt").read_text(encoding="utf-8"), request["prompt"])
+
+    def test_builtin_default_is_an_actual_style_reference_not_a_private_identity(self):
+        self.planning()
+        request, job = self.read("imagegen-request.json"), self.read("job.json")
+        self.assertEqual(job["style_source"], "builtin_reference")
+        self.assertIsNone(job["profile_path"])
+        self.assertEqual(len(job["references"]), 1)
+        reference = job["references"][0]
+        self.assertEqual(reference["id"], "lulu-q-style-v1")
+        self.assertEqual(reference["role"], "style")
+        self.assertEqual(reference["origin"], "builtin_default")
+        self.assertEqual(reference["sha256"], ops.digest(self.builtin_image))
+        self.assertIn(reference["path"], request["referenced_image_paths"])
+        self.assertIn("图2参考角色=style", request["prompt"])
+        self.assertIn("不借Lulu的身份、发型、肤色、服装、动作、表情、人数或文字", request["prompt"])
+        self.assertIn("二维彩色Q版", request["prompt"])
+        self.assertIn("线条干净统一，柔和体积阴影", request["prompt"])
+        self.assertIn("约两头身", request["prompt"])
+        self.assertIn("自然展开身体高（下巴至脚底）约1:1", request["prompt"])
+        self.assertIn(self.metadata["default_instructions"], request["prompt"])
+        self.assertEqual(set(request), {"prompt", "referenced_image_paths", "transparent_background"})
+
+    def test_auto_and_standard_entries_use_agent_scenario_without_scene_picker(self):
+        for entry in ["auto", "standard"]:
+            for scenario in ["no_person", "pet_object"]:
+                with self.subTest(entry=entry, scenario=scenario):
+                    self.output = self.base / f"{entry}-{scenario}"
+                    report = self.planning(entry_mode=entry, scenario=scenario, output_dir=str(self.output))
+                    self.assertEqual(report["status"], "planned")
+                    self.assertEqual(self.read("job.json")["options"]["scenario"], scenario)
+                    self.assertFalse((self.output / "scene-picker.json").exists())
+                    self.assertIsNone(report["scene_picker"])
+                    self.assertTrue((self.output / "imagegen-request.json").is_file())
+
+    def test_explicit_scene_entry_without_answer_only_creates_three_choice_picker_and_job(self):
+        report = self.planning(entry_mode="scene")
+        job, picker = self.read("job.json"), self.read("scene-picker.json")
+        self.assertEqual(report["status"], "scene_choice_needed")
+        self.assertIsNone(report["request"])
+        self.assertEqual({path.name for path in self.output.iterdir()}, {"job.json", "scene-picker.json"})
+        self.assertEqual(set(picker), {"questions"})
+        self.assertEqual(len(picker["questions"]), 1)
+        question = picker["questions"][0]
+        self.assertEqual(set(question), {"title", "options"})
+        self.assertEqual(len(question["options"]), 3)
+        self.assertEqual([item.split("：")[0] for item in question["options"]], ["没拍到我", "宠物小物互动", "人太小替换"])
+        self.assertIn("never pick the first option or proceed on timeout", job["next_action"])
+        self.assertIn("ordinary text", job["next_action"])
+        with self.assertRaisesRegex(ValueError, "executable"):
+            ops.collect(self.output / "job.json", self.source)
+
+    def test_answered_scene_overrides_scenario_and_does_not_ask_again(self):
+        self.planning(entry_mode="scene", scene_choice="pet_object", scenario="standard")
+        job = self.read("job.json")
+        self.assertEqual(job["status"], "planned")
+        self.assertEqual(job["options"]["scenario"], "pet_object")
+        self.assertEqual(job["options"]["placement"], "in_scene")
+        self.assertEqual(job["options"]["entry_mode"], "scene")
+        self.assertEqual(job["options"]["scene_choice"], "pet_object")
+        self.assertIn("场景 pet_object", self.read("imagegen-request.json")["prompt"])
+        self.assertFalse((self.output / "scene-picker.json").exists())
+
+    def test_replacement_scene_choice_never_invents_permission(self):
+        self.planning(entry_mode="scene", scene_choice="small_person")
+        job = self.read("job.json")
+        self.assertEqual(job["status"], "recommendation_needed")
+        self.assertFalse(job["options"]["replace_real_person"])
+        self.assertEqual(job["options"]["scenario"], "small_person")
+        self.assertFalse((self.output / "scene-picker.json").exists())
+        self.assertFalse((self.output / "imagegen-request.json").exists())
+
+    def test_answered_replacement_scene_runs_only_with_explicit_permission(self):
+        self.planning(entry_mode="scene", scene_choice="small_person", replace_real_person=True)
+        job = self.read("job.json")
+        self.assertEqual(job["status"], "planned")
+        self.assertTrue(job["options"]["replace_real_person"])
+        self.assertIn("场景 small_person", self.read("imagegen-request.json")["prompt"])
+        self.assertFalse((self.output / "scene-picker.json").exists())
+
+    def test_invalid_entry_or_scene_choice_is_rejected_before_output(self):
+        for changes in [{"entry_mode": "guess"}, {"entry_mode": "scene", "scene_choice": "standard"},
+                        {"entry_mode": "auto", "scene_choice": "pet_object"},
+                        {"entry_mode": "standard", "scene_choice": "no_person"}]:
+            with self.subTest(config=changes), self.assertRaises(ValueError):
+                self.planning(**changes)
+        self.assertFalse(self.output.exists())
+
+    def test_scene_choice_precedes_style_choice_and_keeps_both_independent(self):
+        self.planning(entry_mode="scene", style_selection="needed")
+        waiting_job = self.output / "job.json"
+        before = waiting_job.read_bytes()
+        self.assertEqual(self.read("job.json")["status"], "scene_choice_needed")
+        self.assertEqual(self.read("job.json")["options"]["style_selection"], "needed")
+        self.assertFalse((self.output / "style-picker.json").exists())
+        self.output = self.base / "answered-scene"
+        self.planning(output_dir=str(self.output), entry_mode="scene", scene_choice="no_person",
+                      style_selection="needed", style_options=[{"id": "a", "label": "A"}, {"id": "b", "label": "B"}])
+        self.assertEqual(self.read("job.json")["status"], "style_choice_needed")
+        self.assertTrue((self.output / "style-picker.json").exists())
+        self.assertFalse((self.output / "scene-picker.json").exists())
+        self.assertFalse((self.output / "imagegen-request.json").exists())
+        self.assertFalse(self.read("job.json")["options"]["replace_real_person"])
+        self.assertEqual(waiting_job.read_bytes(), before)
+
+    def test_auto_detected_small_person_still_requires_explicit_replacement_permission(self):
+        self.planning(entry_mode="auto", scenario="small_person")
+        job = self.read("job.json")
+        self.assertEqual(job["status"], "recommendation_needed")
+        self.assertFalse(job["options"]["replace_real_person"])
+        self.assertFalse((self.output / "scene-picker.json").exists())
+        self.assertFalse((self.output / "imagegen-request.json").exists())
+
+    def test_explicit_style_skips_builtin_even_when_packaged_metadata_is_missing(self):
+        self.metadata_path.unlink()
+        ref = self.base / "custom-style.png"
+        make_png(ref, width=8)
+        self.planning(references=[{"path": str(ref), "role": "style", "use_for": "仅采用用户明确的3D角色画法"}])
+        request, job = self.read("imagegen-request.json"), self.read("job.json")
+        self.assertEqual(job["style_source"], "explicit_reference")
+        self.assertEqual(request["referenced_image_paths"], [str(self.source), str(ref)])
+        self.assertNotIn("通用默认画风：", request["prompt"])
+        self.assertNotIn("内置画风补充：", request["prompt"])
+
+    def test_explicit_style_text_skips_builtin_and_conflicting_default(self):
+        self.metadata_path.unlink()
+        instructions = "使用用户明确指定的3D黏土质感、三头身设计"
+        self.planning(style_instructions=instructions)
+        request, job = self.read("imagegen-request.json"), self.read("job.json")
+        self.assertEqual(job["style_source"], "explicit_text")
+        self.assertEqual(request["referenced_image_paths"], [str(self.source)])
+        self.assertIn(instructions, request["prompt"])
+        self.assertNotIn("通用默认画风：", request["prompt"])
+        self.assertNotIn("约1:1", request["prompt"])
+        self.assertNotIn("builtin_default", json.dumps(job["references"]))
+
+    def test_explicit_text_has_priority_with_a_selected_style_reference(self):
+        ref = self.base / "custom.png"
+        make_png(ref, width=7)
+        self.planning(style_instructions="只按本次明确的水彩短身设计",
+                      references=[{"path": str(ref), "role": "style", "use_for": "只参考轮廓"}])
+        request = self.read("imagegen-request.json")
+        self.assertEqual(self.read("job.json")["style_source"], "explicit_text")
+        self.assertIn(str(ref), request["referenced_image_paths"])
+        self.assertNotIn(str(self.builtin_image), request["referenced_image_paths"])
+        self.assertIn("以此要求为准", request["prompt"])
+        self.assertNotIn("通用默认画风：", request["prompt"])
+
+    def test_identity_layout_and_overall_references_do_not_replace_builtin_style(self):
+        ref = self.base / "selected.png"
+        make_png(ref, width=7)
+        for role in ["identity", "layout", "overall"]:
+            with self.subTest(role=role):
+                self.output = self.base / role
+                self.planning(output_dir=str(self.output), references=[{
+                    "path": str(ref), "role": role, "use_for": "只采用身份、布局或背景范围，不提供角色画风"}])
+                job = self.read("job.json")
+                self.assertEqual(job["style_source"], "builtin_reference")
+                self.assertEqual([r["role"] for r in job["references"]], [role, "style"])
+                self.assertIn(str(self.builtin_image), self.read("imagegen-request.json")["referenced_image_paths"])
+
+    def test_disabling_builtin_needs_no_asset_and_still_supplies_text_default(self):
+        self.metadata_path.unlink()
+        self.planning(use_builtin_style=False)
+        request, job = self.read("imagegen-request.json"), self.read("job.json")
+        self.assertEqual(job["style_source"], "text_default")
+        self.assertEqual(job["references"], [])
+        self.assertEqual(request["referenced_image_paths"], [str(self.source)])
+        self.assertIn("通用默认画风：", request["prompt"])
+        self.assertIn("二维彩色Q版", request["prompt"])
+        self.assertNotIn("Lulu", request["prompt"])
+
+    def test_missing_builtin_metadata_fails_before_creating_output(self):
+        self.metadata_path.unlink()
+        with self.assertRaisesRegex(ValueError, "metadata missing"):
+            self.planning()
+        self.assertFalse(self.output.exists())
+
+    def test_missing_builtin_image_fails_before_creating_output(self):
+        self.builtin_image.unlink()
+        with self.assertRaisesRegex(ValueError, "image missing"):
+            self.planning()
+        self.assertFalse(self.output.exists())
+
+    def test_tampered_builtin_image_is_not_silently_used(self):
+        make_png(self.builtin_image, width=19)
+        with self.assertRaisesRegex(ValueError, "SHA-256 mismatch"):
+            self.planning()
+        self.assertFalse(self.output.exists())
+
+    def test_builtin_metadata_cannot_reference_absolute_or_escaped_image_paths(self):
+        outside = self.base / "outside.png"
+        make_png(outside, width=8)
+        for image_name in [str(self.builtin_image), "../outside.png"]:
+            with self.subTest(path=image_name):
+                self.metadata_path.write_text(json.dumps({**self.metadata, "image": image_name,
+                                                          "sha256": ops.digest(outside)}), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, "inside assets|outside assets"):
+                    self.planning()
+        self.assertFalse(self.output.exists())
+
+    def test_builtin_default_keeps_existing_waiting_gates(self):
+        choices = [{"id": "a", "label": "A"}, {"id": "b", "label": "B"}]
+        cases = [("permission", {"scenario": "small_person"}, "recommendation_needed"),
+                 ("review", {"inputs_reviewed": False}, "needs_input_review"),
+                 ("choice", {"style_selection": "needed", "style_options": choices}, "style_choice_needed")]
+        for name, changes, expected in cases:
+            with self.subTest(gate=name):
+                self.output = self.base / name
+                self.planning(output_dir=str(self.output), **changes)
+                job = self.read("job.json")
+                self.assertEqual(job["status"], expected)
+                self.assertEqual(job["style_source"], "builtin_reference")
+                self.assertFalse((self.output / "imagegen-request.json").exists())
+                self.assertEqual(job["options"]["style_selection"], changes.get("style_selection", "resolved"))
+                self.assertEqual(job["references"][0]["sha256"], ops.digest(self.builtin_image))
+
+    def test_collect_verifies_builtin_reference_unchanged_like_other_inputs(self):
+        self.planning()
+        result = self.generated()
+        make_png(self.builtin_image, width=17)
+        with self.assertRaisesRegex(ValueError, "changed or missing"):
+            ops.collect(self.output / "job.json", result)
+        self.assertFalse((self.output / "final.png").exists())
 
     def test_pet_object_defaults_to_scene_and_keeps_people(self):
         self.planning(scenario="pet_object")
@@ -107,8 +345,9 @@ class CodexJobTests(unittest.TestCase):
         prompt = request["prompt"]
         self.assertIn(str(ref), request["referenced_image_paths"])
         self.assertIn("明确认可的角色资产或比例参考优先", prompt)
-        self.assertIn("新设计且没有特定认可资产时，以约两头身为起点", prompt)
-        self.assertIn("自然展开身体高（下巴至脚底）约1:1", prompt)
+        self.assertIn("不叠加通用默认的二维画法或头身目标", prompt)
+        self.assertNotIn("新设计且没有特定认可资产时，以约两头身为起点", prompt)
+        self.assertNotIn("通用默认画风：", prompt)
         self.assertIn("不为填满原真人身高", prompt)
         self.assertIn("调整角色整体尺度使其合理入景", prompt)
         self.assertIn("仍需目视检查", prompt)
@@ -245,7 +484,7 @@ class CodexJobTests(unittest.TestCase):
         self.assertEqual(self.planning()["status"], "needs_input_review")
 
     def test_boolean_strings_are_not_authorization(self):
-        for name in ["replace_real_person", "inputs_reviewed", "add_text"]:
+        for name in ["replace_real_person", "inputs_reviewed", "add_text", "use_builtin_style"]:
             with self.subTest(name=name), self.assertRaisesRegex(ValueError, "true or false"):
                 self.planning(**{name: "true"})
         self.assertFalse(self.output.exists())
@@ -442,7 +681,7 @@ class CodexJobTests(unittest.TestCase):
         report = json.loads(doctor.stdout)
         self.assertTrue(report["stdlib_only"])
         self.assertFalse(report["network_calls"])
-        self.spec_path.write_text(json.dumps(self.config), encoding="utf-8")
+        self.spec_path.write_text(json.dumps({**self.config, "use_builtin_style": False}), encoding="utf-8")
         report = subprocess.run([sys.executable, str(SCRIPT), "plan", "--config", "job-spec.json"], cwd=self.base, capture_output=True, text=True)
         self.assertEqual(report.returncode, 0, report.stderr)
         self.assertEqual(json.loads(report.stdout)["status"], "planned")

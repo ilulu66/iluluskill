@@ -1,19 +1,13 @@
 {
   "example_only": true,
-  "skill_version": "3.0.0-rc.2",
+  "skill_version": "3.0.0-rc.3",
   "source_photo": "input/source.jpg",
   "output_dir": "runs/example-001",
   "scenario": "standard",
   "placement": "corner",
   "scene_intent": "填写本图实际情境：谁在何处做什么，与哪件道具互动。",
   "subject_details": "填写已选主角数量、当前衣服、动作、视线、表情、遮挡和关键道具；区分原片可见、用户说明、获准设计补全。",
-  "references": [
-    {
-      "path": "input/approved-chibi-style.png",
-      "role": "style",
-      "use_for": "只参考实际认可的线条、五官概括与角色比例；衣服和动作按本图，不复制参考的家具或文案。"
-    }
-  ],
+  "references": [],
   "background_render_style": "photo",
   "decoration": "clean",
   "add_text": false,
@@ -21,7 +15,11 @@
   "replace_real_person": false,
   "inputs_reviewed": false,
   "edit_scope": "visual",
-  "template_note": "Replace relative paths and text with actual reviewed inputs. Inputs are not included in the package. Set inputs_reviewed=true only after viewing every selected image. For private profile references use reference_ids with an explicit --profile; do not package that profile. For a genuinely unresolved style use needed with 2-3 actual displayed candidate options (id/label/description), wait for an explicit answer, then use resolved in a new run. Delegate only when the user asks you to choose; never default to the first option on timeout.",
+  "template_note": "Source/output paths and scene details are placeholders to fill after actual image review. The skill includes its own default style image; review it before inputs_reviewed=true. Own style references or style_instructions override it. entry_mode auto/standard adapts the actual scenario without scene picker; explicit scene mode waits for scene_choice. Never infer deletion permission or user identity.",
   "style_selection": "resolved",
-  "style_options": []
+  "style_options": [],
+  "entry_mode": "auto",
+  "scene_choice": "",
+  "use_builtin_style": true,
+  "style_instructions": ""
 }

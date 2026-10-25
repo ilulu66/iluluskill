@@ -1,6 +1,6 @@
 interface:
   display_name: "朋友圈照骗 · 三场景"
   short_description: "标准版保留真人，按没人入镜、宠物小物互动、人太小替换三个场景加入同款Q版"
-  default_prompt: "用 $cool-chibi-photo 处理这张照片，先看图选标准版或三个场景，沿用已确认设置和参考角色设计，实际调用内置图像工具并交付可评图PNG。"
+  default_prompt: "用 $cool-chibi-photo 处理这张照片，默认按图自动适配并使用包内Q版画风参考；只有我明确说场景版才弹三个场景选择。画风只借画法，人物按本次原照，沿用已确认设置并交付可评图PNG。"
 policy:
   allow_implicit_invocation: true

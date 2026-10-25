@@ -2,7 +2,7 @@
 
 Required Notice: Copyright 2026 Lulu (https://github.com/ilulu66)
 
-本组件随iluluskill v0.5.0-rc.2分发，与仓库LICENSE.md采用相同授权范围：个人学习、研究、试用免费；商业用途须先取得Lulu书面授权并付费。
+本组件随iluluskill v0.5.0-rc.3分发，与仓库LICENSE.md采用相同授权范围：个人学习、研究、试用免费；商业用途须先取得Lulu书面授权并付费。
 
 - scripts/、tests/及其他软件代码采用 **PolyForm Noncommercial License 1.0.0**，全文见[LICENSES/PolyForm-Noncommercial-1.0.0.md](LICENSES/PolyForm-Noncommercial-1.0.0.md)。
 - SKILL.md、README、提示词、配置示例及方法论文档采用 **CC BY-NC 4.0**，完整条款见 https://creativecommons.org/licenses/by-nc/4.0/legalcode 。

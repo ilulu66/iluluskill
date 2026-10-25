@@ -1,5 +1,5 @@
 {
-  "skill_version": "3.0.0-rc.2",
+  "skill_version": "3.0.0-rc.3",
   "schema_status": "policy_defaults_not_a_job",
   "note": "Reference policy; codex_job.py does not automatically load this file. Build each job from job.example.json after reviewing the actual inputs.",
   "scenario": "standard",
@@ -36,7 +36,8 @@
     ],
     "require_use_for": true,
     "view_every_selected_input_before_generation": true,
-    "private_profile": "local_only_not_distributed"
+    "private_profile": "local_only_not_distributed",
+    "builtin_style": "assets/default-style.json -> lulu-q-style.png; style only, never user identity; actually view/pass the image"
   },
   "output_policy": {
     "source_read_only": true,
@@ -54,7 +55,7 @@
   "style_selection": "resolved",
   "style_options": [],
   "style_selection_policy": {
-    "needed_only_when": "genuinely_uncertain_and_no_explicit_style_approved_reference_batch_lock_or_delegation",
+    "needed_only_when": "real unresolved style conflict or user asks to choose; built-in default alone is already resolved",
     "show_actual_references_first": true,
     "candidate_count_for_native_picker": "2_to_3_actual_options_no_fixed_presets",
     "insufficient_actual_references": "show_actual_count_and_clarify_in_text_do_not_invent_options",
@@ -75,5 +76,15 @@
     "max_inset_ratio": 0.12,
     "safe_margin_short_edge_ratio": 0.035,
     "note": "Legacy photo_ops.py compose defaults only; in-scene generation uses the job placement and chibi_policy, not these corner limits."
+  },
+  "entry_mode": "auto",
+  "scene_choice": "",
+  "use_builtin_style": true,
+  "style_instructions": "",
+  "entry_policy": {
+    "auto_or_standard": "Agent reviews photo, chooses actual scenario and proceeds without scene picker",
+    "scene": "three choices, wait for explicit answer then plan with scene_choice",
+    "replacement": "never infer removal permission from automatic adaptation",
+    "missing_identity": "use actual selected identity or ask only if the user explicitly wants themselves; never substitute Lulu as the reader"
   }
 }

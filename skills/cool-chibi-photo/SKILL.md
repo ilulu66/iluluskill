@@ -1,13 +1,33 @@
 ---
 name: cool-chibi-photo
-description: 编辑已有照片，按标准版或没拍到我、宠物小物互动、人太小替换三个场景加入同款Q版。用于朋友圈照骗、真人加小人、摸猫或小物互动、原位替换小人物；支持Codex内置图像工具，或Claude分析并交接Grok手动出图。
+description: 编辑已有照片，按标准版或没拍到我、宠物小物互动、人太小替换三个场景加入同款Q版。用户说用iluluskill P图、朋友圈照骗、真人加小人、摸猫或小物互动时使用；默认自动适配，明确场景版才弹路由；支持Codex内置图像工具，或Claude分析并交接Grok手动出图。
 metadata:
-  version: "3.0.0-rc.2"
+  version: "3.0.0-rc.3"
 ---
 
 # 朋友圈照骗 · Claude / Codex 三场景版
 
 标准底子保留真人＋右下同款Q版；三个场景处理没人入镜、宠物小物互动、替换小人物。先看实际图片，再按本张情境选择，不让所有照片共用一个右下贴纸模板。
+
+## 用户入口：默认直接做，场景版才弹路由
+
+| 用户怎么说 | 执行行为 |
+|---|---|
+| “帮我用这个iluluskill P图”或未写模式 | entry_mode=auto，看实际图片后自动选择合适scenario，直接执行；不弹场景菜单 |
+| “标准版” | entry_mode=standard，同样直接处理；有清楚真人时保留真人加Q版，缺主角或以宠物小物为主时按照片自动适配 |
+| “场景版” | entry_mode=scene，先让用户选下方三个场景；没有明确选择前不生成 |
+
+场景版用当前实际可用的原生选择工具，三项是“没拍到我”“宠物小物互动”“人太小替换”；没有工具时用同样的文字选项。选择等待不能按预选或超时代答。答复后设置scene_choice为no_person / pet_object / small_person并新建计划；已选场景或本批明确方案不重复询问。场景菜单只控制本图做法，画风默认沿用包内参考。
+
+entry_mode只控制交互；内部scenario仍需Agent实际看图确定，helper不识别画面。标准入口遇到本人没入镜时可以用no_person，宠物或小物为主时可用pet_object，不强套右下模板。自动适配不擅自删真人：未获替换许可时保留真人加Q版，明确替换后才用small_person。用户选了表述清楚的替换选项且目标明确，可记录本图许可，不重复问同一件事；helper仍要求replace_real_person=true。
+
+缺少主体时优先用本次已有、明确映射的角色。用户明确要“本人”而缺本人资料时只补问一张本人身份照；未要求特定本人时，可明确说明并采用通用原创角色，不把示例Lulu当使用者本人、不猜真实身份。缺原片等必要信息仍须补齐，不用假图占位。
+
+## 默认画风已内置
+
+默认使用[包内Lulu Q版画风图](assets/lulu-q-style.png)与[规范](references/DEFAULT_STYLE.md)：细腻圆润二维彩色、干净线条、柔和体积阴影、大头短躯干短四肢；新设计约两头身，认可角色比例优先。只借画法和比例，不复制Lulu身份、发型/肤色、黑衣、闭眼笑、坐姿、手势或人数。读者人物、衣服动作与表情按自己的原照。
+
+不必让读者另外找画风图；Agent需实际打开并传入包内图。Codex helper在没有明确文字画风或style参考时自动加入这张图；Claude把它作为实际附件交给用户带到Grok。默认已明确时直接做，不把缺少自备风格图变成弹窗。自己的style参考、style_instructions或已认可角色设计优先；use_builtin_style=false可关闭内置图。风格选择不改变背景、服装或删人许可。
 
 ## 先选实际执行方式
 
@@ -39,7 +59,7 @@ Grok在这里是外部图片编辑工具；本包没有自动Grok连接器，不
 
 ## 参考与设置
 
-- **画风不确定时让用户选**：已有明确画风、本图/本批认可参考或“你决定”时直接沿用。确实拿不准且缺这些信息时，先展示2～3张实际可读、用途清楚的候选参考，再用当前可用的原生选择工具提问（如request_user_input_async）；没有该工具就给简短文字选项。选择只改变画风，不自动改变衣服、场景、背景或删人许可。界面预选和超时都不算答复；候选不足就如实说，不编图凑数。
+- **画风不确定时让用户选**：内置默认已明确时不必询问；已有明确画风、本图/本批认可参考或“你决定”时直接沿用。确实拿不准且缺这些信息时，先展示2～3张实际可读、用途清楚的候选参考，再用当前可用的原生选择工具提问（如request_user_input_async）；没有该工具就给简短文字选项。选择只改变画风，不自动改变衣服、场景、背景或删人许可。界面预选和超时都不算答复；候选不足就如实说，不编图凑数。
 - 对应spec用style_selection=needed与2～3项style_options，helper只生成style-picker.json并停在style_choice_needed。用户答复后记录选择，设置resolved并创建新计划；明确委托时用delegate。已有选择不重复问；具体JSON与工具入参见[PROMPTS.md](references/PROMPTS.md)。
 - 逐张查看原片与实际选用的参考；生图时实际传入，记录每张为 identity / style / layout / overall 及 use_for。原图锁本张衣服动作；画风图不自动授权复制裙子、手势、文案或故事。
 - 已认可角色比例优先；新角色无具体设计时用约两头身、短躯干短四肢。动作和情境可读优先于全身露脚；入景允许自然半身、遮挡和参考中的无白描边。
@@ -59,7 +79,7 @@ Grok在这里是外部图片编辑工具；本包没有自动Grok连接器，不
 当前会话需有 `view_image` 与内置 `imagegen`。本地helper不调用收费API，不负责视觉判断，也不能单独从终端生成图像。工具接口以当前会话实际说明为准。
 
 1. 查看输入、写 scene_intent 与 subject_details，确定场景和本轮范围。需要本机已认可例图时，检查可选私有 `local-profile.json`，只挑本次所需引用；它不是分发包必需文件。[EXAMPLES.md](references/EXAMPLES.md)列出选参考的方法。
-2. 用 [assets/job.example.json](assets/job.example.json) 填实际 spec；路径相对 spec 文件解析。确认已看所有传入图后才设 `inputs_reviewed=true`。运行：
+2. 用 [assets/job.example.json](assets/job.example.json) 填实际 spec；路径相对 spec 文件解析。确认已看所有传入图（含本次实际使用的包内默认图）后才设 `inputs_reviewed=true`。运行：
 
    ```bash
    python3 scripts/codex_job.py doctor
@@ -67,7 +87,7 @@ Grok在这里是外部图片编辑工具；本包没有自动Grok连接器，不
    # 若 spec 使用 reference_ids：加 --profile /absolute/local-profile.json
    ```
 
-3. 读取生成的job。只有`planned`才有可执行的`imagegen-request.json`；`recommendation_needed`等用户替换选择，`needs_input_review`先真正看图，`style_choice_needed`先展示候选并提问。将请求中实际的 `prompt`、`referenced_image_paths`、`transparent_background` 传给内置imagegen；不要虚构模型、mask或输出路径参数。
+3. 读取生成的job。只有`planned`才有可执行的`imagegen-request.json`；`scene_choice_needed`按scene-picker.json等场景选择，`recommendation_needed`等用户替换选择，`needs_input_review`先真正看图，`style_choice_needed`先展示候选并提问。将请求中实际的 `prompt`、`referenced_image_paths`、`transparent_background` 传给内置imagegen；不要虚构模型、mask或输出路径参数。
 4. 取得本次新PNG后查看，按 [QA.md](references/QA.md) 写真实视觉记录，再归档：
 
    ```bash
@@ -81,4 +101,4 @@ Codex安装、依赖、自检见[CODEX_SETUP.md](references/CODEX_SETUP.md)；Cl
 
 ## 版本与范围
 
-3.0.0-rc.2：补充Claude / Claude Code安装与Grok手动交接路由；保留rc.1的三场景Codex工具链、条件风格选择、非生成式工具与软件回归。实图覆盖以[VALIDATION.md](VALIDATION.md)为准，Claude＋Grok尚未端到端实图验证。原片只读，私人照片、人物库和运行记录不进分发包。
+3.0.0-rc.3：随包提供Lulu明确授权的纯角色画风图并实际接入默认请求；未写模式/标准版直接适配，场景版才三选一路由。保留Claude/Grok手动交接、原三场景与画风选择、非生成式工具。实图覆盖以[VALIDATION.md](VALIDATION.md)为准，Claude＋Grok尚未端到端实图验证。原片只读，私人照片、人物库和运行记录不进分发包。
